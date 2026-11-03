@@ -681,6 +681,7 @@ window.LevelObject = class LevelObject {
     this._groupOpacity = {};
     this._groupColliders = {};
     this._sections = [];
+    this._sectionStoppables = new Set();
     this._sectionContainers = [];
     this._collisionSections = [];
     this._nearbyBuffer = [];
@@ -3360,6 +3361,7 @@ window.LevelObject = class LevelObject {
     const _0x4ac40a = this._getSectionIndexForWorldX(sliderWidth._eeWorldX);
     this._sections[_0x4ac40a] ||= [];
     this._sections[_0x4ac40a].push(sliderWidth);
+    this._trackSectionStoppable(sliderWidth);
     sliderWidth._eeSectionIndex = _0x4ac40a;
     if (sliderWidth._eeZDepth !== undefined) {
       sliderWidth.depth = sliderWidth._eeZDepth;
@@ -3377,6 +3379,10 @@ window.LevelObject = class LevelObject {
     } else {
       _0x2157d3.normal.add(sliderWidth);
     }
+  }
+  // objects LDM has to stop() every frame, so updateVisibility doesn't scan the whole level for them
+  _trackSectionStoppable(obj) {
+    if (obj && (typeof obj.stop === 'function' || obj.emitters)) this._sectionStoppables.add(obj);
   }
   _refreshSpriteSection(sprite) {
     if (!sprite || sprite._eeWorldX === undefined) return;
@@ -3402,6 +3408,7 @@ window.LevelObject = class LevelObject {
     }
     this._sections[nextSection] ||= [];
     if (!this._sections[nextSection].includes(sprite)) this._sections[nextSection].push(sprite);
+    this._trackSectionStoppable(sprite);
     sprite._eeSectionIndex = nextSection;
 
     const layer = sprite._eeLayer !== undefined ? sprite._eeLayer : 1;
@@ -3464,21 +3471,15 @@ window.LevelObject = class LevelObject {
         }
       } catch (e) {}
       try {
-        if (Array.isArray(this._sections)) {
-          for (const sec of this._sections) {
-            if (!Array.isArray(sec)) continue;
-            for (const obj of sec) {
-              if (!obj) continue;
-              try {
-                if (typeof obj.stop === 'function') obj.stop();
-                if (obj.emitters && Array.isArray(obj.emitters)) {
-                  for (const em of obj.emitters) {
-                    try { if (typeof em.stop === 'function') em.stop(); } catch (e) {}
-                  }
-                }
-              } catch (e) {}
+        for (const obj of this._sectionStoppables) {
+          try {
+            if (typeof obj.stop === 'function') obj.stop();
+            if (obj.emitters && Array.isArray(obj.emitters)) {
+              for (const em of obj.emitters) {
+                try { if (typeof em.stop === 'function') em.stop(); } catch (e) {}
+              }
             }
-          }
+          } catch (e) {}
         }
       } catch (e) {}
       try { if (this._glowSprites) for (const g of this._glowSprites) g.setVisible(false); } catch(e) {}
@@ -3606,14 +3607,16 @@ window.LevelObject = class LevelObject {
     return [...new Set(colliders)].filter(Boolean);
   }
 
-  _getObjectGroupIds(obj) {
-    const groups = Array.isArray(obj?._eeGroups) ? obj._eeGroups : [];
-    return [...new Set(groups.map(gid => parseInt(gid, 10)).filter(gid => Number.isFinite(gid) && gid > 0))];
-  }
-
+  // runs for every moved sprite/collider every frame, so no temp arrays or Sets here
   _getCombinedGroupOffset(obj) {
     const result = { x: 0, y: 0 };
-    for (const gid of this._getObjectGroupIds(obj)) {
+    const groups = Array.isArray(obj?._eeGroups) ? obj._eeGroups : [];
+    for (let i = 0; i < groups.length; i++) {
+      const gid = parseInt(groups[i], 10);
+      if (!Number.isFinite(gid) || gid <= 0) continue;
+      let dupe = false;
+      for (let j = 0; j < i && !dupe; j++) dupe = parseInt(groups[j], 10) === gid;
+      if (dupe) continue;
       const off = this._groupOffsets?.[gid];
       if (!off) continue;
       result.x += Number(off.x) || 0;
