@@ -1605,8 +1605,12 @@ class PlayerObject {
       this._shipDragActive = false;
       this._streak.stop();
       this._streak.reset();
-      this._waveTrail.stop();
-      this._waveTrail.reset();
+      // keep the wave trail in LDM, it's needed to read the wave
+      if (!this.p.isDead) {
+        this._waveTrail.setPosition(this._scene._playerWorldX, b(this.p.y));
+        this._waveTrail.setMiniScale(this.p.isMini);
+        this._waveTrail.update(_0x5af874);
+      }
       return;
     }
 
@@ -4812,8 +4816,13 @@ if (this.p.isFlying || this.p.isUfo) {
             gameObj, pieceWidth, playersY, playersLastY, left, right, top, bottom, playerSize, waveHitSize, gamemodeAddition
           );
           if (slopeResult.died) {
-            this.killPlayer();
-            return;
+            // from PR #387: slopes must not kill through noclip
+            if (window.noClip) {
+              this.p.diedThisFrame = true;
+            } else {
+              this.killPlayer();
+              return;
+            }
           }
           if (slopeResult.landed && slopeResult.candidate) {
             const cand = slopeResult.candidate;
