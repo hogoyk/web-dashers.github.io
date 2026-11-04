@@ -2107,6 +2107,7 @@ class LevelEditor {
 
         saveObj.x += dx / 2;
         saveObj.y -= dy / 2;
+        this._editorFurthestX = null;
         if (saveObj._raw) {
             saveObj._raw["2"] = String(saveObj.x);
             saveObj._raw["3"] = String(saveObj.y);
@@ -2580,6 +2581,7 @@ class LevelEditor {
         for (const saveIndex of saveIndexes) {
             window.levelObjects[saveIndex] = null;
         }
+        this._editorFurthestX = null;
     }
 
     this._refreshEditorCollisionCaches();
@@ -3064,6 +3066,7 @@ class LevelEditor {
 
     if (Array.isArray(window.levelObjects) && saveIndex !== -1) {
         window.levelObjects[saveIndex] = null;
+        this._editorFurthestX = null;
     }
 
     this._refreshEditorCollisionCaches();
@@ -8743,20 +8746,31 @@ _serializeObject(object) {
   }
 
 
+  // From PR #385 by antonfdiaz: the timeline calls this every frame, and it walked every
+  // object. Cached; moving or deleting objects resets _editorFurthestX, and a new level
+  // array or added objects (length change) recompute it too.
   _getEditorLevelWidth() {
-    let furthestX = 0;
+    const objects = window.levelObjects;
+    if (this._editorFurthestX == null || this._editorFurthestXSource !== objects ||
+        this._editorFurthestXCount !== objects.length) {
+        let furthestX = 0;
 
-    for (const obj of window.levelObjects) {
-        if (!obj) continue;
+        for (const obj of objects) {
+            if (!obj) continue;
 
-        const worldX = (obj.x - 15) * 2;
+            const worldX = (obj.x - 15) * 2;
 
-        if (worldX > furthestX) {
-            furthestX = worldX;
+            if (worldX > furthestX) {
+                furthestX = worldX;
+            }
         }
+
+        this._editorFurthestX = furthestX;
+        this._editorFurthestXSource = objects;
+        this._editorFurthestXCount = objects.length;
     }
 
-    return Math.max(screenWidth, furthestX + screenWidth/2);
+    return Math.max(screenWidth, this._editorFurthestX + screenWidth/2);
   }
 
 

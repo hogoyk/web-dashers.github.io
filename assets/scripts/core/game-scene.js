@@ -644,6 +644,13 @@ class GameScene extends Phaser.Scene {
     return icon;
   });
 
+    // same conditions as the editor branch of update(), which hit-tests while the pointer is down
+    this.input.on("pointerdown", (pointer) => {
+      if (!window.isEditor || window.isEditorPause) return;
+      if (this._editorPlaytestActive && !this._editorPlaytestPaused) return;
+      this._hitObjects = this.input.hitTestPointer(pointer);
+    });
+
     this._copyrightText = this.add.text(0, 630, "© 2026 RobTop Games · geometrydash.com", {
       fontSize: "14px",
       color: "#ffffff",
@@ -8210,7 +8217,10 @@ _showwippopup() {
         this._level?.invalidateRenderCaches?.();
         if (window.isEditorPause) return;
         const pointer = this.input.activePointer;
-        this._hitObjects = this.input.hitTestPointer(pointer);
+        // From PR #385 by antonfdiaz: hit-testing every interactive object each frame is only
+        // needed while the pointer is down (below, and the editor's pointerup handler reads
+        // the last pressed frame's result); a press is also tested in the pointerdown handler
+        if (pointer.isDown || !this._hitObjects) this._hitObjects = this.input.hitTestPointer(pointer);
         this._levelEditor._handleEditorCamera(deltaTime); 
         this._levelEditor._updateEditorGrid(); 
         if (pointer.isDown && !this._isDraggingSlider) {
