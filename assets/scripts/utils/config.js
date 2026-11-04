@@ -6,6 +6,20 @@ if (window.mainColor == null) {
 if (window.secondaryColor == null) {
   window.secondaryColor = parseInt(localStorage.getItem("iconSecondaryColor") || "00FBFF", 16);
 }
+// Graphics popup options (from PR #385 by antonfdiaz). The defaults are the original look:
+// smooth (linear) texture filtering and a canvas the size of the game (renderScale 1).
+window.graphicsQualityOptions = ["smooth", "sharp"];
+window.renderScaleOptions = [0.3, 0.5, 0.75, 1, 1.5, 2];
+(function () {
+  let quality = null;
+  let scale = NaN;
+  try {
+    quality = localStorage.getItem("gd_graphics_quality");
+    scale = Number(localStorage.getItem("gd_render_scale"));
+  } catch (e) {}
+  window.graphicsQuality = window.graphicsQualityOptions.includes(quality) ? quality : "smooth";
+  window.renderScale = window.renderScaleOptions.includes(scale) ? scale : 1;
+})();
 window.currentPlayer = localStorage.getItem("iconCurrentPlayer") || "player_01";
 window.currentShip   = localStorage.getItem("iconCurrentShip")   || "ship_01";
 window.currentBall   = localStorage.getItem("iconCurrentBall")   || "player_ball_01";

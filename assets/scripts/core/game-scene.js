@@ -5642,6 +5642,104 @@ _buildSettingsPopup() {
     localStorage.setItem("gd_settings", JSON.stringify(settings));
     localStorage.setItem("gd_useDirectInternet", String(!!window.useDirectInternet));
   }
+  // From PR #385 by antonfdiaz: texture quality and render resolution. Defaults (smooth, 1x)
+  // are the original look. Quality is a Phaser boot option, so changing it reloads the page;
+  // the resolution applies live (window.setRenderScale in main.js).
+  _buildGraphicsPopup() {
+    // (a scene restart destroys an open popup without clearing this)
+    if (this._graphicsPopup?.scene) return;
+
+    const centerX = screenWidth / 2;
+    const centerY = screenHeight / 2;
+    const panelWidth = 700;
+    const panelHeight = 450;
+    const qualityOptions = [
+      { id: "smooth", label: "SMOOTH" },
+      { id: "sharp", label: "SHARP" }
+    ];
+    const resolutions = window.renderScaleOptions || [1];
+
+    this._graphicsPopup = this.add.container(0, 0).setScrollFactor(0).setDepth(260);
+    const dim = this.add.rectangle(centerX, centerY, screenWidth, screenHeight, 0, 100 / 255).setInteractive().setAlpha(0);
+    const inner = this.add.container(centerX, centerY).setScale(0);
+    this._graphicsPopup.add([dim, inner]);
+
+    const corner = 0.325 * this.textures.get("GJ_square01").source[0].width;
+    inner.add(this.add.nineslice(0, 0, "GJ_square01", null, panelWidth, panelHeight, corner, corner, corner, corner).setOrigin(0.5));
+
+    const close = this.add.image(-panelWidth / 2 + 10, -panelHeight / 2 + 10, "GJ_WebSheet", "GJ_closeBtn_001.png")
+      .setScale(0.8)
+      .setInteractive();
+    inner.add(close);
+
+    const title = this.add.bitmapText(0, -panelHeight / 2 + 40, "bigFont", "Graphics", 58).setOrigin(0.5);
+    const qualityLabel = this.add.bitmapText(0, -110, "goldFont", "Texture Quality", 34).setOrigin(0.5);
+    const qualityValue = this.add.bitmapText(0, -60, "bigFont", "", 43).setOrigin(0.5);
+    const resolutionLabel = this.add.bitmapText(0, 5, "goldFont", "Resolution", 34).setOrigin(0.5);
+    const resolutionValue = this.add.bitmapText(0, 65, "bigFont", "", 43).setOrigin(0.5);
+    inner.add([title, qualityLabel, qualityValue, resolutionLabel, resolutionValue]);
+
+    let qualityIndex = Math.max(0, qualityOptions.findIndex(option => option.id === window.graphicsQuality));
+    let resolutionIndex = resolutions.indexOf(window.renderScale);
+    if (resolutionIndex < 0) resolutionIndex = Math.max(0, resolutions.indexOf(1));
+    const updateQuality = () => qualityValue.setText(qualityOptions[qualityIndex].label);
+    const updateResolution = () => {
+      const scale = resolutions[resolutionIndex];
+      resolutionValue.setText(`${Math.round(screenWidth * scale)}x${Math.round(screenHeight * scale)}`);
+    };
+    updateQuality();
+    updateResolution();
+
+    const makeArrow = (x, y, flip, onClick) => {
+      const arrow = this.add.image(x, y, "GJ_GameSheet03", "GJ_arrow_01_001.png").setFlipX(flip).setScale(0.8).setInteractive();
+      inner.add(arrow);
+      this._makeBouncyButton(arrow, 0.8, onClick);
+    };
+    makeArrow(-200, -60, false, () => { qualityIndex = (qualityIndex - 1 + qualityOptions.length) % qualityOptions.length; updateQuality(); });
+    makeArrow(200, -60, true, () => { qualityIndex = (qualityIndex + 1) % qualityOptions.length; updateQuality(); });
+    makeArrow(-200, 65, false, () => { resolutionIndex = (resolutionIndex - 1 + resolutions.length) % resolutions.length; updateResolution(); });
+    makeArrow(200, 65, true, () => { resolutionIndex = (resolutionIndex + 1) % resolutions.length; updateResolution(); });
+
+    const closePopup = () => {
+      if (!this._graphicsPopup) return;
+      this.tweens.killTweensOf(inner);
+      this.tweens.killTweensOf(dim);
+      this._graphicsPopup.destroy();
+      this._graphicsPopup = null;
+    };
+    this._makeBouncyButton(close, 0.8, closePopup);
+
+    const makeButton = (x, text, action) => {
+      const button = this.add.nineslice(x, panelHeight / 2 - 45, "GJ_button01", null, 210, 60, 28, 28, 28, 28)
+        .setInteractive();
+      const buttonText = this.add.bitmapText(x, panelHeight / 2 - 50, "goldFont", text, 48).setOrigin(0.5);
+      inner.add([button, buttonText]);
+      this._makeCompositeBouncyButton(button, [button, buttonText], 1, action);
+    };
+    makeButton(-120, "BACK", closePopup);
+    makeButton(120, "APPLY", () => {
+      const quality = qualityOptions[qualityIndex].id;
+      const scale = resolutions[resolutionIndex];
+      if (typeof window.setRenderScale === "function") window.setRenderScale(scale);
+      else localStorage.setItem("gd_render_scale", String(scale));
+      if (quality !== window.graphicsQuality) {
+        localStorage.setItem("gd_graphics_quality", quality);
+        this._saveSettings();
+        window.location.reload();
+        return;
+      }
+      closePopup();
+    });
+
+    this.tweens.add({ targets: dim, alpha: 1, duration: 250, ease: "Linear" });
+    this.tweens.add({
+      targets: inner,
+      scale: { from: 0, to: 1 },
+      duration: 660,
+      ease: "Elastic.Out",
+      easeParams: [1, 0.6]
+    });
+  }
   _loadSettings() {
     const saved = localStorage.getItem("gd_settings");
     const defaults = {
@@ -9938,7 +10036,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     _makeSettingsBtn(_sColL, _sRow1Y, "Account",    _sBtnW2, false, null);
     _makeSettingsBtn(_sColR, _sRow1Y, "How To Play", _sBtnW2, true, () => { this._buildHowToPlayPopup(); });
     _makeSettingsBtn(_sColL, _sRow2Y, "Options",    _sBtnW2, true,  () => { this._buildSettingsPopup(); });
-    _makeSettingsBtn(_sColR, _sRow2Y, "Graphics",   _sBtnW2, false, null);
+    _makeSettingsBtn(_sColR, _sRow2Y, "Graphics",   _sBtnW2, true,  () => { this._buildGraphicsPopup(); });
     _makeSettingsBtn(_sCol3L, _sRow3Y, "Rate",      _sBtnW3, true, () => { this._redirectRate(); });
     _makeSettingsBtn(_sCol3M, _sRow3Y, "Songs",     _sBtnW3, true, () => { this._hideSettingsScreen(() => this.time.delayedCall(150, () => this._buildsongspopup())); });
     _makeSettingsBtn(_sCol3R, _sRow3Y, "Help",      _sBtnW3, true, () => { this._hideSettingsScreen(() => this.time.delayedCall(150, () => this._buildhelppopup())); });
