@@ -2772,9 +2772,7 @@ class LevelEditor {
 
     const registerColor = (spr, ch) => {
       if (ch > 0 && objectDef?.can_color !== false && spr && !spr._isSaw) {
-        spr._eeColorChannel = ch;
-        if (!this._level._colorChannelSprites[ch]) this._level._colorChannelSprites[ch] = [];
-        this._level._colorChannelSprites[ch].push(spr);
+        this._level._registerColorChannelSprite(spr, ch);
       }
     };
 

@@ -1940,6 +1940,7 @@ window.LevelObject = class LevelObject {
     const visual = { container: triggerContainer, line: lineGfx, hitbox: hitboxGfx, sprite: triggerSprite, label, saveObj: levelObj };
     this._editorTriggerVisuals.push(visual);
     this._setTriggerEditorVisualVisible(visual, !!window.isEditor);
+    if (window.isEditor) this._triggerVisualsShown = true;
 
     if (Number.isInteger(linkedObjectId)) {
       if (!this.objectSprites[linkedObjectId]) this.objectSprites[linkedObjectId] = [];
@@ -1949,6 +1950,10 @@ window.LevelObject = class LevelObject {
   updateTriggerEditorVisuals() {
     const visible = !!window.isEditor;
     if (!this._editorTriggerVisuals) return;
+    // From PR #385 by antonfdiaz: outside the editor these stay hidden, so don't walk every
+    // trigger each frame. Resets (which can re-show section sprites) clear the flag.
+    if (!visible && this._triggerVisualsShown === false) return;
+    this._triggerVisualsShown = visible;
     for (const visual of this._editorTriggerVisuals) {
       const saveObj = visual?.saveObj;
       const isTouchTrigger = saveObj && String(saveObj?._raw?.[11] ?? saveObj?._raw?.["11"] ?? "0") === "1";
@@ -2010,9 +2015,7 @@ window.LevelObject = class LevelObject {
 
     const colorChannel = parseInt(levelObj.color1 || objectDef?.default_base_color_channel || 0, 10) || 0;
     if (colorChannel > 0 && objectDef?.can_color !== false) {
-      textSprite._eeColorChannel = colorChannel;
-      if (!this._colorChannelSprites[colorChannel]) this._colorChannelSprites[colorChannel] = [];
-      this._colorChannelSprites[colorChannel].push(textSprite);
+      this._registerColorChannelSprite(textSprite, colorChannel);
     }
 
     if (levelObj.groups) {
@@ -2383,9 +2386,7 @@ window.LevelObject = class LevelObject {
     const registerColor = (spr, ch, forceParentColor = false) => {
       if (!spr || spr._cantColor || (spr._isBlack && !spr._canColor)) return;
       if (ch > 0 && (canColor || spr._canColor) && spr) {
-        spr._eeColorChannel = ch;
-        if (!this._colorChannelSprites[ch]) this._colorChannelSprites[ch] = [];
-        this._colorChannelSprites[ch].push(spr);
+        this._registerColorChannelSprite(spr, ch);
         if (forceParentColor && spr._SawColor === undefined) {
           spr._SawColor = ch;
         }
@@ -3084,8 +3085,7 @@ window.LevelObject = class LevelObject {
         padObj._padParticleEmitter = _padEmitter;
         padObj.emitters = [_padEmitter];
         if (levelObj.color1 > 0) {
-          if (!this._colorChannelSprites[levelObj.color1]) this._colorChannelSprites[levelObj.color1] = [];
-          this._colorChannelSprites[levelObj.color1].push(_padEmitter);
+          this._registerColorChannelSprite(_padEmitter, levelObj.color1);
         }
         const objGids = levelObj.groups ? String(levelObj.groups).split(".").map(Number).filter(n => n > 0) : null;
         if (objGids && objGids.length) {
@@ -3370,6 +3370,7 @@ window.LevelObject = class LevelObject {
     return triggered;
   }
   resetColorTriggers() {
+    this.invalidateRenderCaches();
     this._colorTriggerIdx = 0;
     this._touchColorTriggerActivated = new Set();
   }
@@ -3516,7 +3517,15 @@ window.LevelObject = class LevelObject {
           } catch (e) {}
         }
       } catch (e) {}
-      try { if (this._glowSprites) for (const g of this._glowSprites) g.setVisible(false); } catch(e) {}
+      // From PR #385 by antonfdiaz: glows only need hiding again when LDM was just turned on,
+      // glows were added/removed, or a reset re-showed them (invalidateRenderCaches)
+      const glowCount = this._glowSprites ? this._glowSprites.length : 0;
+      if (this._ldmHiddenGlowCount !== glowCount) {
+        try { if (this._glowSprites) for (const g of this._glowSprites) g.setVisible(false); } catch(e) {}
+        this._ldmHiddenGlowCount = glowCount;
+      }
+    } else {
+      this._ldmHiddenGlowCount = -1;
     }
     const _0x1dce22 = this._sectionContainers.length - 1;
     if (_0x1dce22 < 0) {
@@ -4056,15 +4065,32 @@ window.LevelObject = class LevelObject {
       }
     }
 
+    // From PR #385 by antonfdiaz: a faded group gets the same alpha written to every sprite
+    // every frame. Skip the pass while its inputs are unchanged and nothing else has
+    // written the alpha of a group sprite since (_groupAlphaDirty, see applyEnterEffects).
+    const glowAlpha = this._getGlowAlphaMultiplier();
+    if (!this._groupAlphaDirty && this._groupAlphaGlow === glowAlpha && this._groupAlphaInputsUnchanged()) return;
+    let cacheable = true;
+    const snapshot = this._groupAlphaSnapshot || {};
     for (const gid in this._groupOpacity) {
       const sprites = this._groupSprites[gid];
-      if (!sprites) continue;
       const op = this._groupOpacity[gid];
+      const entry = snapshot[gid] || (snapshot[gid] = {});
+      entry.op = op;
+      entry.list = sprites;
+      entry.count = sprites ? sprites.length : 0;
+      if (!sprites) continue;
       for (const spr of sprites) {
-        if (!spr || !spr.active) continue;
+        if (!spr || !spr.active) {
+          // a live but inactive sprite would be skipped now and written later
+          if (spr && spr.scene) cacheable = false;
+          continue;
+        }
+        // coin pickups tween the coin's alpha, which this pass overwrites every frame
+        if (spr._coinWorldX !== undefined) cacheable = false;
         if (spr._eeActive) continue;
         const baseAlpha = spr._eeOrigAlpha ?? 1;
-        const targetAlpha = baseAlpha * op * (spr._eeIsGlowSprite ? this._getGlowAlphaMultiplier() : 1);
+        const targetAlpha = baseAlpha * op * (spr._eeIsGlowSprite ? glowAlpha : 1);
         if (typeof spr.setAlpha === "function") spr.setAlpha(targetAlpha);
         if (spr._padParticleEmitter) {
           if (typeof spr._padParticleEmitter.setAlpha === "function") spr._padParticleEmitter.setAlpha(targetAlpha);
@@ -4072,9 +4098,38 @@ window.LevelObject = class LevelObject {
         }
       }
     }
+    this._groupAlphaSnapshot = snapshot;
+    this._groupAlphaGlow = glowAlpha;
+    this._groupAlphaDirty = !cacheable;
+  }
+
+  _groupAlphaInputsUnchanged() {
+    const snapshot = this._groupAlphaSnapshot;
+    if (!snapshot) return false;
+    for (const gid in this._groupOpacity) {
+      const entry = snapshot[gid];
+      const sprites = this._groupSprites[gid];
+      if (!entry || entry.op !== this._groupOpacity[gid] || entry.list !== sprites ||
+          entry.count !== (sprites ? sprites.length : 0)) return false;
+    }
+    return true;
+  }
+
+  // Next frame re-applies colour channels, group alpha, LDM glow hiding and trigger-visual
+  // hiding in full. Called by resets and by the editor while it is not playtesting.
+  invalidateRenderCaches() {
+    for (const chId in this._colorChannelSprites) {
+      const sprites = this._colorChannelSprites[chId];
+      if (sprites) sprites._eeApplied = false;
+    }
+    this._groupAlphaDirty = true;
+    this._ldmHiddenGlowCount = -1;
+    this._triggerVisualsShown = undefined;
   }
 
   resetAlphaTriggers() {
+    this._groupAlphaSnapshot = null;
+    this.invalidateRenderCaches();
     this._alphaTriggerIdx = 0;
     this._activeAlphaTweens = [];
     this._groupOpacity = {};
@@ -4257,7 +4312,7 @@ window.LevelObject = class LevelObject {
             if (!spr || !spr.active) continue;
             if (typeof spr.setTint === "function") {
               if (intensity > 0.01) { spr.setTint(pulseHex); spr._eePulsed = true; }
-              else if (typeof spr.clearTint === "function") { spr.clearTint(); spr._eePulsed = false; }
+              else if (typeof spr.clearTint === "function") { spr.clearTint(); spr._eePulsed = false; this._invalidateSpriteColor(spr); }
             }
           }
         }
@@ -4284,44 +4339,87 @@ window.LevelObject = class LevelObject {
       if (pulse.elapsed >= pulse.totalDuration) {
         if (trig.targetType === 1 && trig.targetGroup > 0) {
           const sprites = this._groupSprites[trig.targetGroup];
-          if (sprites) for (const spr of sprites) { if (spr && spr.active && typeof spr.clearTint === "function") { spr.clearTint(); spr._eePulsed = false; } }
+          if (sprites) for (const spr of sprites) { if (spr && spr.active && typeof spr.clearTint === "function") { spr.clearTint(); spr._eePulsed = false; this._invalidateSpriteColor(spr); } }
         }
         if (trig.targetType === 0 && trig.targetChannel > 0) {
           const chSprites = this._colorChannelSprites[trig.targetChannel];
-          if (chSprites) for (const spr of chSprites) { if (spr && spr.active) spr._eePulsed = false; }
+          if (chSprites) {
+            for (const spr of chSprites) { if (spr && spr.active) spr._eePulsed = false; }
+            chSprites._eeApplied = false;
+          }
         }
         this._activePulses.splice(i, 1);
       } else { i++; }
     }
   }
   resetPulseTriggers() {
+    this.invalidateRenderCaches();
     this._pulseTriggerIdx = 0;
     this._activePulses = [];
   }
 
+  _registerColorChannelSprite(sprite, channel) {
+    const list = this._colorChannelSprites[channel] || (this._colorChannelSprites[channel] = []);
+    // A sprite in two lists (or twice in one) ends up with the colour of whichever list is
+    // tinted last; such lists are re-applied every frame, so that stays as it was.
+    if (sprite._eeColorList) {
+      sprite._eeColorList._eeSharedSprites = true;
+      list._eeSharedSprites = true;
+    }
+    sprite._eeColorChannel = channel;
+    sprite._eeColorList = list;
+    list.push(sprite);
+    list._eeApplied = false;
+  }
+
+  _invalidateSpriteColor(sprite) {
+    if (sprite._eeColorList) sprite._eeColorList._eeApplied = false;
+  }
+
   applyColorChannels(colorManager) {
+    const canCheckColor = typeof colorManager.hasColor === "function";
     for (const chId in this._colorChannelSprites) {
       const sprites = this._colorChannelSprites[chId];
       if (!sprites || !sprites.length) continue;
       const hex = colorManager.getHex(parseInt(chId, 10));
+      const hasColor = canCheckColor ? colorManager.hasColor(chId) : true;
+      // From PR #385 by antonfdiaz: re-tinting a channel whose colour hasn't changed is a
+      // no-op. Pulses, resets and the editor clear _eeApplied when they touch these tints.
+      if (sprites._eeApplied && sprites._eeHex === hex && sprites._eeHasColor === hasColor &&
+          sprites._eeCount === sprites.length && sprites._eeColorManager === colorManager) continue;
+      let cacheable = !sprites._eeSharedSprites;
       for (const spr of sprites) {
-        if (!spr || !spr.active) continue;
+        if (!spr) continue;
+        if (!spr.active) {
+          // a live but inactive sprite would be skipped now and tinted later
+          if (spr.scene) cacheable = false;
+          continue;
+        }
         if (spr._cantColor) continue;
         if (spr._eePulsed) continue;
         if (spr._eeAudioScale) continue;
         if (spr._isSaw && spr._SawColor !== undefined) {
+          // tinted from another channel, whose changes this check can't see
+          if (String(spr._SawColor) !== chId) cacheable = false;
           const sawHex = colorManager.getHex(spr._SawColor);
           spr.setTint(sawHex);
           continue;
         }
         if (spr._isSaw) continue;
         if (spr._isBlack && !spr._canColor) continue;
-        if (spr._blackDefault && typeof colorManager.hasColor === "function" && !colorManager.hasColor(chId)) continue;
+        if (spr._blackDefault && !hasColor) continue;
         if (typeof spr.setTint === "function") spr.setTint(hex);
       }
+      sprites._eeApplied = cacheable;
+      sprites._eeHex = hex;
+      sprites._eeHasColor = hasColor;
+      sprites._eeCount = sprites.length;
+      sprites._eeColorManager = colorManager;
     }
   }
   resetEnterEffectTriggers() {
+    // re-shows and re-alphas every section sprite (glows and trigger visuals included)
+    this.invalidateRenderCaches();
     this._enterEffectTriggerIdx = 0;
     this._activeEnterEffect = 0;
     this._activeExitEffect = 0;
@@ -4359,6 +4457,17 @@ window.LevelObject = class LevelObject {
     }
     return op;
   }
+  // an enter effect finishing writes this sprite's alpha; stepAlphaTriggers must redo its groups
+  _markGroupAlphaDirtyFor(spr) {
+    const groups = spr._eeGroups;
+    if (!groups || this._groupAlphaDirty) return;
+    for (const gid of groups) {
+      if (this._groupOpacity[gid] !== undefined) {
+        this._groupAlphaDirty = true;
+        return;
+      }
+    }
+  }
 
   applyEnterEffects(_0x2f36ed) {
     const _0x221c93 = 400;
@@ -4381,6 +4490,7 @@ window.LevelObject = class LevelObject {
         if (_0x8f9d56) {
           if (effectSprite._eeActive) {
             effectSprite._eeActive = false;
+            this._markGroupAlphaDirtyFor(effectSprite);
             effectSprite.y = effectSprite._eeBaseY;
             effectSprite.x = effectSprite._eeWorldX;
             if (!effectSprite._eeAudioScale) {
@@ -4397,6 +4507,7 @@ window.LevelObject = class LevelObject {
         if (_0x289aa2 >= 1) {
           if (effectSprite._eeActive) {
             effectSprite._eeActive = false;
+            this._markGroupAlphaDirtyFor(effectSprite);
             effectSprite.y = effectSprite._eeBaseY;
             effectSprite.x = effectSprite._eeWorldX;
             if (!effectSprite._eeAudioScale) {
@@ -4541,6 +4652,7 @@ window.LevelObject = class LevelObject {
     }
   }
   resetObjects() {
+    this.invalidateRenderCaches();
     this._resetremovedobjects();
     for (let _0x3d473e of this.objects) {
       if (!_0x3d473e) {

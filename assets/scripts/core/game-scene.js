@@ -8108,6 +8108,8 @@ _showwippopup() {
             return;
         }
 
+        // editing re-tints/re-alphas level sprites behind the level's per-frame caches
+        this._level?.invalidateRenderCaches?.();
         if (window.isEditorPause) return;
         const pointer = this.input.activePointer;
         this._hitObjects = this.input.hitTestPointer(pointer);
