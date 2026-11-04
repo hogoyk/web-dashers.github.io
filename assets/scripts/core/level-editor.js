@@ -3349,14 +3349,23 @@ class LevelEditor {
         window._backgroundId = String(numericValue).padStart(2, "0");
 
         const bgKey = "game_bg_" + getBackgroundTextureIndex(numericValue);
-
-        if (this._bg && this.textures.exists(bgKey)) {
+        this._editorRequestedBgKey = bgKey;
+        const applyEditorBg = () => {
+            // only the newest pick may change the background
+            if (this._editorRequestedBgKey !== bgKey || !this._bg?.scene || !this.textures.exists(bgKey)) return;
             this._bg.setTexture(bgKey);
             const newBgH = this.textures.get(bgKey).source?.[0]?.height;
 
             if (newBgH) {
                 this._bgInitY = newBgH - screenHeight - o;
             }
+        };
+
+        // backgrounds are loaded on first use (GameScene._loadBackgroundTexture)
+        if (this._bg && this.textures.exists(bgKey)) {
+            applyEditorBg();
+        } else if (this._bg && typeof this._loadBackgroundTexture === "function") {
+            this._loadBackgroundTexture(bgKey, applyEditorBg);
         }
     } else if (key === "kA7") {
         window._groundId = getGroundTextureId(numericValue);

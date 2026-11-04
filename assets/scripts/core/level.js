@@ -138,7 +138,13 @@ function parseObject(objectString) {
     };
   }
 }
-function parseLevel(levelString) {
+// peekLevelBackgroundIndex() inflates the level before GameScene.create() parses it;
+// the result is kept for that one parse so a big level isn't inflated twice
+let _peekedLevelInflate = null;
+function inflateLevelString(levelString) {
+  const peeked = _peekedLevelInflate;
+  _peekedLevelInflate = null;
+  if (peeked && peeked.input === levelString) return peeked.output;
   let decompressedString = null;
   try{
     decompressedString = function (compressedString) {
@@ -160,6 +166,34 @@ function parseLevel(levelString) {
   } catch(InvalidCharacterError) {
     decompressedString = levelString;
   }
+  return decompressedString;
+}
+// Background index GameScene.create() will pick for this level (same rules as
+// loadLevel/_setUpSettings + create), or null when it depends on the previous level.
+function peekLevelBackgroundIndex(levelString) {
+  if (typeof levelString !== "string" || !levelString) return null;
+  let inflated;
+  try {
+    inflated = inflateLevelString(levelString);
+  } catch (e) {
+    return null;
+  }
+  if (typeof inflated !== "string") return null;
+  _peekedLevelInflate = { input: levelString, output: inflated };
+  const headerEnd = inflated.indexOf(";");
+  const header = headerEnd < 0 ? inflated : inflated.slice(0, headerEnd);
+  if (!header) return null;
+  const pairs = header.split(",");
+  let kA6;
+  for (let i = 0; i + 1 < pairs.length; i += 2) {
+    if (pairs[i] === "kA6") kA6 = pairs[i + 1];
+  }
+  const fallback = parseInt(getBackgroundDisplayId(kA6), 10) || 1;
+  const parsed = parseInt(kA6 ?? fallback, 10);
+  return getBackgroundTextureIndex(Number.isFinite(parsed) && parsed > 0 ? parsed : fallback);
+}
+function parseLevel(levelString) {
+  let decompressedString = inflateLevelString(levelString);
   let stringParts = decompressedString.split(";");
   let settings = stringParts.length > 0 ? stringParts[0] : "";
   let objects = [];

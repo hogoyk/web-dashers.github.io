@@ -169,7 +169,7 @@ class BootScene extends Phaser.Scene {
       "Loading will be finished... soon",
       "This seems like a good place to hide a secret...",
       "The vault Keeper's name is 'Spooky'...",
-      "Hop the big guy doesn't wakt up...",
+      "Hope the big guy doesn't wake up...",
       "Shhhh! You're gonna wake the big one!",
       "I have been expecting you.",
       "A wild WebDasher appeared!",
@@ -227,24 +227,6 @@ class BootScene extends Phaser.Scene {
       this.children.bringToTop(robtopLogo);
       this.children.bringToTop(gjLogo);
       this.children.bringToTop(Logo);
-      if (window.gameCache) {
-        const originalXhr = this.load.xhrLoader;
-        this.load.xhrLoader = (file) => {
-          const url = file.url;
-          if (window.gameCache.isFileCached(url)) {
-            const cached = window.gameCache.getCachedFile(url);
-            if (cached) {
-              return new Promise((resolve) => {
-                setTimeout(() => { file.data = cached; resolve(file); }, 1);
-              });
-            }
-          }
-          return originalXhr.call(this.load, file).then((result) => {
-            if (result && result.data) window.gameCache.cacheFile(url, result.data);
-            return result;
-          });
-        };
-      }
 
       this.load.atlas("GJ_GameSheet", "assets/sheets/GJ_GameSheet.png", "assets/sheets/GJ_GameSheet.json");
       this.load.atlas("GJ_GameSheet02", "assets/sheets/GJ_GameSheet02.png", "assets/sheets/GJ_GameSheet02.json");
@@ -256,13 +238,11 @@ class BootScene extends Phaser.Scene {
       this.load.atlas("Wavesheet", "assets/sheets/Wavesheet.png", "assets/sheets/Wavesheet.json");
       this.load.json("Spider_AnimDesc", "assets/sheets/Spider_AnimDesc.json");
       this.load.json("Robot_AnimDesc", "assets/sheets/Robot_AnimDesc.json");
-      this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json");
       this.load.atlas("player_ball_00", "assets/sheets/player_ball_00.png", "assets/sheets/player_ball_00.json");
       this.load.atlas("player_dart_00", "assets/sheets/player_dart_00.png", "assets/sheets/player_dart_00.json");
       this.load.atlas("CCControlColourPickerSpriteSheet-uhd", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.png", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.json");
-      this.load.atlas("PixelSheet_01-hd", "assets/sheets/PixelSheet_01.png", "assets/sheets/PixelSheet_01.json");
-      this.load.atlas("FireSheet_01-hd", "assets/sheets/FireSheet_01-hd.png", "assets/sheets/FireSheet_01-hd.json");
-      this.load.atlas("GJ_ParticleSheet-uhd", "assets/sheets/GJ_ParticleSheet.png", "assets/sheets/GJ_ParticleSheet.json");
+      // PixelSheet_01, FireSheet_01, GJ_ParticleSheet and the practice song are only used
+      // inside levels and the editor: GameScene.preload() loads them before one is built
       this.load.image("bigFont", "assets/fonts/bigFont.png");
       this.load.text("bigFontFnt", "assets/fonts/bigFont.fnt");
       this.load.image("square04_001", "assets/sprites/square04_001.png");
@@ -308,18 +288,16 @@ class BootScene extends Phaser.Scene {
         let paddedIndex = String(index);
         if (paddedIndex.length < 2) paddedIndex = "0" + paddedIndex;
         this.load.image("groundSquare_" + paddedIndex + "_001.png", "assets/game-ground/groundSquare_" + i + "_001.png");
-        this.load.image("groundSquare_" + paddedIndex + "_2_001.png", "assets/game-ground/groundSquare_" + i + "_2_001.png");
+        // only grounds 08-22 have a second layer, the others were 404s
+        if (index >= 7) {
+          this.load.image("groundSquare_" + paddedIndex + "_2_001.png", "assets/game-ground/groundSquare_" + i + "_2_001.png");
+        }
       }
 
-      for (let i = 1; i < 60; i++) {
-        let index = i - 1;
-        i = String(i);
-        if (i.length < 2) i = "0" + i;
-        this.load.image("game_bg_" + index, "assets/game-bg/game_bg_" + i + "_001-hd.png");
-      }
+      // The menu background. GameScene loads the others when a level or the editor needs one.
+      this.load.image("game_bg_0", "assets/game-bg/game_bg_01_001-hd.png");
 
       this.load.audio("menu_music", "assets/music/menuLoop.mp3");
-      this.load.audio("StayInsideMe", "assets/music/StayInsideMe.mp3");
 
       /*for (const lvlarray of window.allLevels) {
         this.load.text(lvlarray[2], "assets/levels/" + lvlarray[2].split("_")[1] + ".txt");
@@ -339,16 +317,14 @@ class BootScene extends Phaser.Scene {
       this.load.on("loaderror", () => {});
       this.load.once("complete", () => {
         if (sliderFill) sliderFill.width = 380;
-        this.time.delayedCall(200, () => {
-          const bigFontData = this.cache.text.get("bigFontFnt");
-          if (bigFontData) loadFont(this, "bigFont", bigFontData);
-          const gfd = this.cache.text.get("goldFontFnt");
-          if (gfd && !this.cache.bitmapFont.has("goldFont")) loadFont(this, "goldFont", gfd);
+        const bigFontData = this.cache.text.get("bigFontFnt");
+        if (bigFontData) loadFont(this, "bigFont", bigFontData);
+        const gfd = this.cache.text.get("goldFontFnt");
+        if (gfd && !this.cache.bitmapFont.has("goldFont")) loadFont(this, "goldFont", gfd);
 
-          localStorage.setItem('webdash_assets_loaded', 'true');
-          localStorage.setItem('webdash_last_load_time', Date.now().toString());
-          this.scene.start("GameScene");
-        });
+        localStorage.setItem('webdash_assets_loaded', 'true');
+        localStorage.setItem('webdash_last_load_time', Date.now().toString());
+        this.scene.start("GameScene");
       });
 
       this.load.start();

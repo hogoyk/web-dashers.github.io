@@ -392,7 +392,79 @@ class GameScene extends Phaser.Scene {
       key: "GameScene"
     });
   }
+  // Same level string create() is about to load (or null for the plain menu).
+  _getSceneLevelString() {
+    const levelKey = window.currentlevel?.[2];
+    if (window._onlineLevelString && window._onlineLevelId && levelKey === window._onlineLevelId) {
+      return window._onlineLevelString;
+    }
+    return levelKey != null ? this.cache.text.get(levelKey) : null;
+  }
+  preload() {
+    // From PR #385 by antonfdiaz: the boot screen no longer loads level-only sheets and
+    // all 59 backgrounds. Phaser waits for these files before create(), so the level
+    // (or editor) built there always finds its textures and its background.
+    const levelString = this._getSceneLevelString();
+    if (!levelString && !window.isEditor && !this.game.registry.get("autoStartGame")) return;
+
+    let queuedAssets = false;
+    for (const [key, file] of [
+      ["PixelSheet_01-hd", "PixelSheet_01"],
+      ["FireSheet_01-hd", "FireSheet_01-hd"],
+      ["GJ_ParticleSheet-uhd", "GJ_ParticleSheet"]
+    ]) {
+      if (!this.textures.exists(key)) {
+        queuedAssets = true;
+        this.load.atlas(key, `assets/sheets/${file}.png`, `assets/sheets/${file}.json`);
+      }
+    }
+    if (!this.cache.audio.exists("StayInsideMe")) {
+      queuedAssets = true;
+      this.load.audio("StayInsideMe", "assets/music/StayInsideMe.mp3");
+    }
+    const bgIndex = levelString ? peekLevelBackgroundIndex(levelString) : null;
+    const bgUrl = bgIndex !== null ? this._backgroundTextureUrl("game_bg_" + bgIndex) : null;
+    if (bgUrl && !this.textures.exists("game_bg_" + bgIndex)) {
+      queuedAssets = true;
+      this.load.image("game_bg_" + bgIndex, bgUrl);
+    }
+    if (queuedAssets) {
+      const label = this.add.bitmapText(screenWidth - 100, screenHeight - 30, "bigFont", "Loading...", 30).setOrigin(0.5);
+      const cleanup = () => {
+        label.destroy();
+        this.load.off("complete", cleanup);
+        this.events.off("shutdown", cleanup);
+      };
+      this.load.once("complete", cleanup);
+      this.events.once("shutdown", cleanup);
+    }
+  }
+  // Warm the HTTP cache with the level-only files while the menu is idle, so the
+  // first level start doesn't wait for them (preload() then reads them from cache).
+  _prefetchLevelAssets() {
+    if (window._levelAssetPrefetch || typeof fetch !== "function" || typeof AbortController !== "function") return;
+    const urls = [];
+    if (!this.textures.exists("PixelSheet_01-hd")) urls.push("assets/sheets/PixelSheet_01.json", "assets/sheets/PixelSheet_01.png");
+    if (!this.textures.exists("FireSheet_01-hd")) urls.push("assets/sheets/FireSheet_01-hd.json", "assets/sheets/FireSheet_01-hd.png");
+    if (!this.textures.exists("GJ_ParticleSheet-uhd")) urls.push("assets/sheets/GJ_ParticleSheet.json", "assets/sheets/GJ_ParticleSheet.png");
+    if (!this.cache.audio.exists("StayInsideMe")) urls.push("assets/music/StayInsideMe.mp3");
+    if (!urls.length) return;
+    // aborted by _startGame: by then preload() has loaded these, and gameplay shouldn't share the network/GC
+    const controller = window._levelAssetPrefetch = new AbortController();
+    const next = () => {
+      const url = urls.shift();
+      if (!url || controller.signal.aborted) return;
+      fetch(url, { priority: "low", signal: controller.signal })
+        .then(res => res.arrayBuffer())
+        .then(next, () => {});
+    };
+    setTimeout(() => {
+      if (window.requestIdleCallback) window.requestIdleCallback(next, { timeout: 5000 });
+      else next();
+    }, 2000);
+  }
   create() {
+    this._startAfterBackgroundLoad = false;
     this._bgSpeedX = 0.1;
     this._bgSpeedY = 0.1;
     this._menuCameraX = -centerX;
@@ -457,9 +529,8 @@ class GameScene extends Phaser.Scene {
     window._groundId = getGroundTextureId(_groundRaw);
 
     const _bgKey = "game_bg_" + getBackgroundTextureIndex(_bgGdId);
-    if (this.textures.exists(_bgKey)) {
-      this._applyMirroredBackgroundTexture(_bgKey);
-    }
+    // preload() normally has it already; otherwise this starts loading it
+    this._applyMirroredBackgroundTexture(_bgKey);
     this._level.applyGroundTexture();
     if (this._level._initialColors) {
       for (let chId in this._level._initialColors) {
@@ -516,6 +587,7 @@ class GameScene extends Phaser.Scene {
     window._completedLevels = parseInt(localStorage.getItem("gd_completedLevels") || "0", 10);
     this._playTime = 0;
     this._menuActive = true;
+    this._prefetchLevelAssets();
     this._slideIn = false;
     this._slideGroundX = null;
     this._firstPlay = true;
@@ -6951,6 +7023,14 @@ _showwippopup() {
     if (!this._menuActive) {
       return;
     }
+    // the level's background is still downloading: start once it is there (see _loadBackgroundTexture)
+    if (this._requestedBackgroundKey && !this.textures.exists(this._requestedBackgroundKey) &&
+        this._backgroundLoadCallbacks?.has(this._requestedBackgroundKey)) {
+      this._startAfterBackgroundLoad = true;
+      return;
+    }
+    this._startAfterBackgroundLoad = false;
+    window._levelAssetPrefetch?.abort();
     const _instant = !!this._instantLevelStart;
     this._instantLevelStart = false;
     const _dismiss = (target, tweenProps, cleanup) => {
@@ -7886,7 +7966,65 @@ _showwippopup() {
     }
   }
 
+  // URL of a game_bg_<index> texture (index 0-58 = game_bg_01..59), or null for other keys
+  _backgroundTextureUrl(textureKey) {
+    const match = /^game_bg_(0|[1-9]\d?)$/.exec(textureKey);
+    const index = match ? Number(match[1]) : -1;
+    if (index < 0 || index > 58) return null;
+    return "assets/game-bg/game_bg_" + String(index + 1).padStart(2, "0") + "_001-hd.png";
+  }
+
+  // From PR #385 by antonfdiaz: backgrounds are loaded the first time they are used.
+  // onDone(loaded) runs when the file has loaded or failed; returns false if there is no such file.
+  _loadBackgroundTexture(textureKey, onDone = null) {
+    const url = this._backgroundTextureUrl(textureKey);
+    if (!url) return false;
+    this._backgroundLoadCallbacks ||= new Map();
+    const pending = this._backgroundLoadCallbacks.get(textureKey);
+    if (pending) {
+      if (onDone) pending.push(onDone);
+      return true;
+    }
+    const callbacks = onDone ? [onDone] : [];
+    this._backgroundLoadCallbacks.set(textureKey, callbacks);
+    const completeEvent = "filecomplete-image-" + textureKey;
+    const detach = () => {
+      this.load.off(completeEvent, onComplete);
+      this.load.off("loaderror", onError);
+      this.events.off("shutdown", detach);
+      this._backgroundLoadCallbacks.delete(textureKey);
+    };
+    const finish = (loaded) => {
+      detach();
+      for (const callback of callbacks) callback(loaded);
+    };
+    const onComplete = () => finish(true);
+    const onError = (file) => {
+      if (file?.key === textureKey) finish(false);
+    };
+    this.load.once(completeEvent, onComplete);
+    this.load.on("loaderror", onError);
+    // a scene restart drops the loader queue; the next create() asks again
+    this.events.once("shutdown", detach);
+    this.load.image(textureKey, url);
+    if (!this.load.isLoading()) this.load.start();
+    return true;
+  }
+
   _applyMirroredBackgroundTexture(textureKey) {
+    this._requestedBackgroundKey = textureKey;
+    if (!this.textures.exists(textureKey)) {
+      this._loadBackgroundTexture(textureKey, () => {
+        if (!this._bg?.scene) return;
+        // only the newest request may change the background
+        if (this._requestedBackgroundKey === textureKey && this.textures.exists(textureKey)) {
+          this._applyMirroredBackgroundTexture(textureKey);
+        }
+        // _startGame waits again if the newest requested background is still loading
+        if (this._startAfterBackgroundLoad) this._startGame();
+      });
+      return;
+    }
     const texture = this.textures.get(textureKey);
     const source = texture?.source?.[0];
     const sourceHeight = source?.height || source?.image?.height || source?.image?.naturalHeight || 0;
@@ -7957,6 +8095,11 @@ _showwippopup() {
     return _0xd8019e * 60;
   }
   update(_0x54fa47, deltaTime) {
+    // a level start waiting for its background: keep the scene exactly as create() left it
+    if (this._startAfterBackgroundLoad) {
+      this._deltaBuffer = 0;
+      return;
+    }
     if (window.isEditor) {
         if (this._editorPlaytestActive && !this._editorPlaytestPaused) {
             this._levelEditor._updateEditorPlaytest(deltaTime);
