@@ -157,7 +157,29 @@ const atlasList = [
   "FireSheet_01-hd",
   "Wavesheet",
 ];
+// getAtlasFrame runs for every object built and for every animation frame swap (each one
+// scanning up to 16 atlases and allocating a result). The answer only changes when textures
+// are added or removed, so it is remembered per texture manager until one is. Callers only
+// read the returned { atlas, frame }.
+const _atlasFrameLookups = new WeakMap();
 function getAtlasFrame(scene, frameName) {
+  const textures = scene.textures;
+  let lookups = _atlasFrameLookups.get(textures);
+  if (!lookups) {
+    lookups = new Map();
+    _atlasFrameLookups.set(textures, lookups);
+    const forget = () => lookups.clear();
+    textures.on(Phaser.Textures?.Events?.ADD || "addtexture", forget);
+    textures.on(Phaser.Textures?.Events?.REMOVE || "removetexture", forget);
+  }
+  let found = lookups.get(frameName);
+  if (found === undefined) {
+    found = _findAtlasFrame(scene, frameName);
+    lookups.set(frameName, found);
+  }
+  return found;
+}
+function _findAtlasFrame(scene, frameName) {
   if (frameName.startsWith("player_")) {
     const playerAtlasPriority = ["GJ_GameSheet03", "GJ_GameSheet", "GJ_GameSheet02", "GJ_GameSheet04", "GJ_GameSheetEditor", "GJ_GameSheetGlow", "GJ_GameSheetIcons", "GJ_WebSheet", "GJ_LaunchSheet", "player_ball_00", "player_dart_00"];
     for (let atlasName of playerAtlasPriority) {
