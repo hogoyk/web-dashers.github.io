@@ -646,6 +646,28 @@ function getObjectFromId(id) {
   return allObjects[id] || null;
 }
 
+// Object HSV (keys 41/43 for the main colour, 42/44 for the detail colour), e.g. "0a-0.32a0.22a1a1":
+// hue shift in degrees, saturation, value, then whether s and v are added (1) or multiplied (0).
+function parseObjectHSV(str) {
+  const p = String(str || "").split("a").map(Number);
+  if (p.length < 3 || p.slice(0, 3).some((v) => !Number.isFinite(v))) return null;
+  const h = p[0], s = p[1], v = p[2], sAdd = p[3] === 1, vAdd = p[4] === 1;
+  if (h === 0 && (sAdd ? s === 0 : s === 1) && (vAdd ? v === 0 : v === 1)) return null;
+  return { h, s, v, sAdd, vAdd };
+}
+function hsvShiftHex(hex, o) {
+  const r = ((hex >> 16) & 255) / 255, g = ((hex >> 8) & 255) / 255, b = (hex & 255) / 255;
+  const max = Math.max(r, g, b), d = max - Math.min(r, g, b);
+  let h = d === 0 ? 0 : max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = (h * 60 + o.h) % 360; if (h < 0) h += 360;
+  const clamp = (x) => Math.min(1, Math.max(0, x));
+  const s = clamp(o.sAdd ? (max === 0 ? 0 : d / max) + o.s : (max === 0 ? 0 : d / max) * o.s);
+  const v = clamp(o.vAdd ? max + o.v : max * o.v);
+  const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+  const [r1, g1, b1] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return (Math.round((r1 + m) * 255) << 16) | (Math.round((g1 + m) * 255) << 8) | Math.round((b1 + m) * 255);
+}
+
 window.LevelObject = class LevelObject {
   constructor(scene, cameraXRef) {
     this._scene = scene;
@@ -989,15 +1011,14 @@ window.LevelObject = class LevelObject {
     window.settingslist = settingslist;
   }
 
-  // The colour string is read after the objects spawn, so blending channels are applied here.
+  // GD's per-channel "Blending" (key 5 of the level's colour string), off unless enabled in settings.
+  // The colour string is read after the objects spawn, so it is applied here. Only the blend mode
+  // changes: like in GD, a blending object keeps its z layer and order.
   _applyChannelBlending() {
     if (!window.colorBlending) return;
     for (const ch in this._channelBlending) {
       for (const spr of this._colorChannelSprites[ch] || []) {
-        if (!spr || !spr.setBlendMode || spr._eeLayer === 2 || spr._eeSectionIndex === undefined) continue;
-        spr.setBlendMode(S);
-        spr._eeLayer = 0;
-        this._ensureSectionContainer(spr._eeSectionIndex).additive.add(spr);
+        if (spr && spr.setBlendMode && spr._eeLayer !== 2) spr.setBlendMode(S);
       }
     }
   }
@@ -2399,9 +2420,14 @@ window.LevelObject = class LevelObject {
     const col2 = levelObj.color2 || (objectDef.default_detail_color_channel !== undefined ? objectDef.default_detail_color_channel : -1);
     const canColor = objectDef.can_color !== false;
 
+    const rawObj = levelObj._raw || {};
+    const hsv1 = String(rawObj[41]) === "1" ? parseObjectHSV(rawObj[43]) : null;
+    const hsv2 = String(rawObj[42]) === "1" ? parseObjectHSV(rawObj[44]) : null;
     const registerColor = (spr, ch, forceParentColor = false) => {
       if (!spr || spr._cantColor || (spr._isBlack && !spr._canColor)) return;
       if (ch > 0 && (canColor || spr._canColor) && spr) {
+        const hsv = ch === col1 ? hsv1 : ch === col2 ? hsv2 : null;
+        if (hsv) spr._eeHSV = hsv;
         this._registerColorChannelSprite(spr, ch);
         if (forceParentColor && spr._SawColor === undefined) {
           spr._SawColor = ch;
@@ -3462,13 +3488,6 @@ window.LevelObject = class LevelObject {
     this._trackSectionStoppable(sprite);
     sprite._eeSectionIndex = nextSection;
 
-    // GD's per-channel "Blending" (key 5 of the level's colour string), off unless enabled in settings.
-    // Drawn like the built-in additive objects: additive, in the section's back container.
-    if (window.colorBlending && this._channelBlending[sprite._eeColorChannel] && sprite._eeLayer !== 2 && sprite.setBlendMode) {
-      sprite.setBlendMode(S);
-      sprite._eeLayer = 0;
-    }
-
     const layer = sprite._eeLayer !== undefined ? sprite._eeLayer : 1;
     if (layer === 2) {
       if (sprite.parentContainer !== this.topContainer) this.topContainer.add(sprite);
@@ -4431,7 +4450,7 @@ window.LevelObject = class LevelObject {
         if (spr._isSaw) continue;
         if (spr._isBlack && !spr._canColor) continue;
         if (spr._blackDefault && !hasColor) continue;
-        if (typeof spr.setTint === "function") spr.setTint(hex);
+        if (typeof spr.setTint === "function") spr.setTint(spr._eeHSV && window.colorBlending ? hsvShiftHex(hex, spr._eeHSV) : hex);
       }
       sprites._eeApplied = cacheable;
       sprites._eeHex = hex;

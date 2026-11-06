@@ -5201,7 +5201,7 @@ _buildSettingsPopup() {
         "Show FPS": "Shows the frames per second your game is running at.",
         "Solid Wave Trail": "Removes the extra details of the wave trail.",
         "Hide Wave Trail": "Hides the wave trail completely.",
-        "Color Blending": "Draws color channels that have Blending on additively, like in GD. Applies when a level starts.",
+        "Color Blending": "Draws color channels that have Blending on additively and applies objects' HSV color changes, like in GD. Applies when a level starts.",
         "Show CPS": "Shows when you click in a level in the top left of your screen.",
         "Show Glow": "Shows glow for basic object sets.",
         "Use Proxy (for schools)": "Enables a proxy for a better chance to see online levels when blocked.",
