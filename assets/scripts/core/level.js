@@ -984,8 +984,22 @@ window.LevelObject = class LevelObject {
     this._sourceLevelObjects = levelObjects;
     this._spawnLevelObjects(levelObjects);
     this._setUpSettings(settingslist);
+    this._applyChannelBlending();
     window.levelObjects = levelObjects;
     window.settingslist = settingslist;
+  }
+
+  // The colour string is read after the objects spawn, so blending channels are applied here.
+  _applyChannelBlending() {
+    if (!window.colorBlending) return;
+    for (const ch in this._channelBlending) {
+      for (const spr of this._colorChannelSprites[ch] || []) {
+        if (!spr || !spr.setBlendMode || spr._eeLayer === 2 || spr._eeSectionIndex === undefined) continue;
+        spr.setBlendMode(S);
+        spr._eeLayer = 0;
+        this._ensureSectionContainer(spr._eeSectionIndex).additive.add(spr);
+      }
+    }
   }
 
   _isOfficialLevel() {
@@ -1171,6 +1185,7 @@ window.LevelObject = class LevelObject {
   }
   _setUpSettings(settingsStr) {
     this._initialColors = {};
+    this._channelBlending = {};
     this._backgroundId = null;
     this._groundId = null;
     if (!settingsStr) return;
@@ -1193,6 +1208,7 @@ window.LevelObject = class LevelObject {
         }
         let channelId = parseInt(colorProps[6], 10);
         if (!isNaN(channelId)) {
+          if (colorProps[5] === "1") this._channelBlending[channelId] = true;
           this._initialColors[channelId] = {
             r: parseInt(colorProps[1] || "255", 10),
             g: parseInt(colorProps[2] || "255", 10),
@@ -3445,6 +3461,13 @@ window.LevelObject = class LevelObject {
     if (!this._sections[nextSection].includes(sprite)) this._sections[nextSection].push(sprite);
     this._trackSectionStoppable(sprite);
     sprite._eeSectionIndex = nextSection;
+
+    // GD's per-channel "Blending" (key 5 of the level's colour string), off unless enabled in settings.
+    // Drawn like the built-in additive objects: additive, in the section's back container.
+    if (window.colorBlending && this._channelBlending[sprite._eeColorChannel] && sprite._eeLayer !== 2 && sprite.setBlendMode) {
+      sprite.setBlendMode(S);
+      sprite._eeLayer = 0;
+    }
 
     const layer = sprite._eeLayer !== undefined ? sprite._eeLayer : 1;
     if (layer === 2) {

@@ -307,7 +307,8 @@ class WaveTrail {
 
     this._gfx.clear();
     this._glowGfx.clear();
-    if (this._pts.length < 2) return;
+    // points keep updating while hidden, so turning the setting off mid-level shows the trail right away
+    if (window.hideWaveTrail || this._pts.length < 2) return;
 
     const solid = window.solidWave === true;
     if (solid) {

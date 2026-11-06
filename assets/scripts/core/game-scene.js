@@ -5200,6 +5200,8 @@ _buildSettingsPopup() {
         "Hitboxes on Death": "Shows hitboxes upon death in both normal and practice mode.",
         "Show FPS": "Shows the frames per second your game is running at.",
         "Solid Wave Trail": "Removes the extra details of the wave trail.",
+        "Hide Wave Trail": "Hides the wave trail completely.",
+        "Color Blending": "Draws color channels that have Blending on additively, like in GD. Applies when a level starts.",
         "Show CPS": "Shows when you click in a level in the top left of your screen.",
         "Show Glow": "Shows glow for basic object sets.",
         "Use Proxy (for schools)": "Enables a proxy for a better chance to see online levels when blocked.",
@@ -5585,6 +5587,22 @@ _buildSettingsPopup() {
           true,
           "Cull Distance"
         );
+        createToggle(container, column2X, startY, "Color Blending",
+            () => window.colorBlending,
+            (v) => window.colorBlending = v,
+            null,
+            25,
+            true,
+            "Color Blending"
+        );
+        createToggle(container, column2X, startY + spacingY, "Hide Wave Trail",
+            () => window.hideWaveTrail,
+            (v) => window.hideWaveTrail = v,
+            null,
+            25,
+            true,
+            "Hide Wave Trail"
+        );
     };
 
     const buildPage = (idx) => {
@@ -5645,6 +5663,8 @@ _buildSettingsPopup() {
         cullDistance: window.cullDistance,
         settingInfoText: window.settingInfoText || {},
         enableLDM: window.enableLDM,
+        colorBlending: !!window.colorBlending,
+        hideWaveTrail: !!window.hideWaveTrail,
     };
     localStorage.setItem("gd_settings", JSON.stringify(settings));
     localStorage.setItem("gd_useDirectInternet", String(!!window.useDirectInternet));
@@ -5804,6 +5824,8 @@ _buildSettingsPopup() {
     window.useDirectInternet = !!data.useDirectInternet;
     localStorage.setItem("gd_useDirectInternet", String(!!window.useDirectInternet));
     window.enableLDM = !!data.enableLDM;
+    window.colorBlending = !!data.colorBlending;
+    window.hideWaveTrail = !!data.hideWaveTrail;
   }
   _buildMacroPopup() {
       if (this._macroPopup) return;
