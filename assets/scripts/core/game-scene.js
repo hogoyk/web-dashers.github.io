@@ -755,7 +755,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(200);
       fadeIn.fillStyle(0x000000, 1);
       fadeIn.fillRect(0, 0, sw, sh);
-      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 300, ease: "Linear", onComplete: () => fadeIn.destroy() });
+      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeIn.destroy() });
 
       const overlay = this.add.graphics().setScrollFactor(0).setDepth(100);
       const gradientSteps = 80;
@@ -903,7 +903,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(600);
       fadeIn.fillStyle(0x000000, 1);
       fadeIn.fillRect(0, 0, sw, sh);
-      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 300, ease: "Linear", onComplete: () => fadeIn.destroy() });
+      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeIn.destroy() });
 
       const overlay = this.add.graphics().setScrollFactor(0).setDepth(500);
       const gradientSteps = 80;
@@ -1237,11 +1237,11 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       fadeOut.fillStyle(0x000000, 1);
       fadeOut.fillRect(0, 0, sw, sh);
       this.tweens.add({
-        targets: fadeOut, alpha: 1, duration: 150, ease: "Linear",
+        targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
         onComplete: () => {
           destroy();
           if (onComplete) onComplete();
-          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 150, ease: "Linear", onComplete: () => fadeOut.destroy() });
+          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeOut.destroy() });
         }
       });
     };
@@ -1408,7 +1408,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(200);
         fadeIn.fillStyle(0x000000, 1);
         fadeIn.fillRect(0, 0, sw, sh);
-        this.tweens.add({ targets: fadeIn, alpha: 0, duration: 300, ease: "Linear", onComplete: () => fadeIn.destroy() });
+        this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeIn.destroy() });
 
         const overlay = this.add.graphics().setScrollFactor(0).setDepth(100);
         const gradientSteps = 80;
@@ -1530,7 +1530,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
             this.tweens.add({
                 targets: listContainer,
                 y: this._scrollTargetY,
-                duration: 250,
+                duration: 0,
                 ease: 'Power2',
                 overwrite: true
             });
@@ -2081,7 +2081,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(200);
       fadeIn.fillStyle(0x000000, 1);
       fadeIn.fillRect(0, 0, sw, sh);
-      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 300, ease: "Linear", onComplete: () => fadeIn.destroy() });
+      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeIn.destroy() });
       const overlay = this.add.graphics().setScrollFactor(0).setDepth(100);
       const gradientSteps = 80;
       for (let gi = 0; gi < gradientSteps; gi++) {
@@ -2399,13 +2399,13 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
             hitZone.on("pointerdown", () => {
               hitZone._pressed = true;
               this.tweens.killTweensOf(btnContainer, "scale");
-              this.tweens.add({ targets: btnContainer, scale: pressedScale, duration: 300, ease: "Bounce.Out" });
+              this.tweens.add({ targets: btnContainer, scale: pressedScale, duration: 0, ease: "Bounce.Out" });
             });
             hitZone.on("pointerout", () => {
               if (hitZone._pressed) {
                 hitZone._pressed = false;
                 this.tweens.killTweensOf(btnContainer, "scale");
-                this.tweens.add({ targets: btnContainer, scale: baseScale, duration: 400, ease: "Bounce.Out" });
+                this.tweens.add({ targets: btnContainer, scale: baseScale, duration: 0, ease: "Bounce.Out" });
               }
             });
             hitZone.on("pointerup", () => {
@@ -2467,13 +2467,13 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         icon.on("pointerdown", () => {
           icon._pressed = true;
           this.tweens.killTweensOf(icon, "scale");
-          this.tweens.add({ targets: icon, scale: _diffFilterPressScale, duration: 300, ease: "Bounce.Out" });
+          this.tweens.add({ targets: icon, scale: _diffFilterPressScale, duration: 0, ease: "Bounce.Out" });
         });
         icon.on("pointerout", () => {
           if (icon._pressed) {
             icon._pressed = false;
             this.tweens.killTweensOf(icon, "scale");
-            this.tweens.add({ targets: icon, scale: _diffFilterBaseScale, duration: 400, ease: "Bounce.Out" });
+            this.tweens.add({ targets: icon, scale: _diffFilterBaseScale, duration: 0, ease: "Bounce.Out" });
           }
         });
         icon.on("pointerup", () => {
@@ -2725,11 +2725,11 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       fadeOut.fillStyle(0x000000, 1);
       fadeOut.fillRect(0, 0, sw, sh);
       this.tweens.add({
-        targets: fadeOut, alpha: 1, duration: 150, ease: "Linear",
+        targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
         onComplete: () => {
           destroy();
           if (onComplete) onComplete();
-          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 150, ease: "Linear", onComplete: () => fadeOut.destroy() });
+          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeOut.destroy() });
         }
       });
     };
@@ -2973,7 +2973,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(200);
       fadeIn.fillStyle(0x000000, 1);
       fadeIn.fillRect(0, 0, sw, sh);
-      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 300, ease: "Linear", onComplete: () => fadeIn.destroy() });
+      this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeIn.destroy() });
 
       const overlay = this.add.graphics().setScrollFactor(0).setDepth(100);
       const gradientSteps = 80;
@@ -3514,13 +3514,13 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
             hitRect.on("pointerdown", () => {
               hitRect._pressed = true;
               iconTargets.forEach(t => this.tweens.killTweensOf(t, "scale"));
-              iconTargets.forEach(t => this.tweens.add({ targets: t, scale: bouncedScale, duration: 300, ease: "Bounce.Out" }));
+              iconTargets.forEach(t => this.tweens.add({ targets: t, scale: bouncedScale, duration: 0, ease: "Bounce.Out" }));
             });
             hitRect.on("pointerout", () => {
               if (hitRect._pressed) {
                 hitRect._pressed = false;
                 iconTargets.forEach(t => this.tweens.killTweensOf(t, "scale"));
-                iconTargets.forEach(t => this.tweens.add({ targets: t, scale: capturedOrigScale, duration: 400, ease: "Bounce.Out" }));
+                iconTargets.forEach(t => this.tweens.add({ targets: t, scale: capturedOrigScale, duration: 0, ease: "Bounce.Out" }));
               }
             });
             hitRect.on("pointerup",    () => {
@@ -3681,10 +3681,10 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       fadeOut.fillStyle(0x000000, 1);
       fadeOut.fillRect(0, 0, sw, sh);
       this.tweens.add({
-        targets: fadeOut, alpha: 1, duration: 150, ease: "Linear",
+        targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
         onComplete: () => {
           destroy();
-          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 150, ease: "Linear", onComplete: () => fadeOut.destroy() });
+          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeOut.destroy() });
         }
       });
     };
@@ -3707,10 +3707,10 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       fadeOut.fillStyle(0x000000, 1);
       fadeOut.fillRect(0, 0, sw, sh);
       this.tweens.add({
-        targets: fadeOut, alpha: 1, duration: 150, ease: "Linear",
+        targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
         onComplete: () => {
           destroy();
-          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 150, ease: "Linear", onComplete: () => fadeOut.destroy() });
+          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeOut.destroy() });
         }
       });
     };
@@ -4154,7 +4154,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(200);
     fadeIn.fillStyle(0x000000, 1);
     fadeIn.fillRect(0, 0, sw, sh);
-    this.tweens.add({ targets: fadeIn, alpha: 0, duration: 300, ease: "Linear", onComplete: () => fadeIn.destroy() });
+    this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeIn.destroy() });
     const overlay = this.add.graphics().setScrollFactor(0).setDepth(150);
     drawOverlay(overlay, bgHex, isEveryEnd(window.currentlevel[2]));
     this._levelSelectOverlay = overlay;
@@ -4203,13 +4203,13 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     backBtn.on("pointerdown", () => {
       backBtn._pressed = true;
       this.tweens.killTweensOf(backBtn);
-      this.tweens.add({ targets: backBtn, scaleX: 1.26, scaleY: -1.26, duration: 300, ease: "Bounce.Out" });
+      this.tweens.add({ targets: backBtn, scaleX: 1.26, scaleY: -1.26, duration: 0, ease: "Bounce.Out" });
     });
     backBtn.on("pointerout", () => {
       if (backBtn._pressed) {
         backBtn._pressed = false;
         this.tweens.killTweensOf(backBtn);
-        this.tweens.add({ targets: backBtn, scaleX: 1, scaleY: -1, duration: 400, ease: "Bounce.Out" });
+        this.tweens.add({ targets: backBtn, scaleX: 1, scaleY: -1, duration: 0, ease: "Bounce.Out" });
       }
     });
     backBtn.on("pointerup", () => {
@@ -4319,7 +4319,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       const levelId = window.currentlevel?.[2];
       if (getLevelCoinRequirement(levelId) > (Number(window._totalsecretcoins) || 0)) return;
       this.tweens.killTweensOf(cardBounceContainer, "scale");
-      this.tweens.add({ targets: cardBounceContainer, scale: 1.26, duration: 300, ease: "Bounce.Out" });
+      this.tweens.add({ targets: cardBounceContainer, scale: 1.26, duration: 0, ease: "Bounce.Out" });
     });
 
     const onDragMove = (ptr) => {
@@ -4331,7 +4331,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       if (!dragState.dragging && Math.abs(dx) > 12) {
         dragState.dragging = true;
         this.tweens.killTweensOf(cardBounceContainer, "scale");
-        this.tweens.add({ targets: cardBounceContainer, scale: 1, duration: 200, ease: "Quad.Out" });
+        this.tweens.add({ targets: cardBounceContainer, scale: 1, duration: 0, ease: "Quad.Out" });
       }
       if (dragState.dragging) {
         cardContainer.x = dx;
@@ -4412,7 +4412,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
             this.load.start();
         } else {
           this.tweens.killTweensOf(cardBounceContainer, "scale");
-          this.tweens.add({ targets: cardBounceContainer, scale: 1, duration: 200, ease: "Quad.Out" });
+          this.tweens.add({ targets: cardBounceContainer, scale: 1, duration: 0, ease: "Quad.Out" });
         }
       }
     };
@@ -4735,10 +4735,10 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     fadeOut.fillStyle(0x000000, 1);
     fadeOut.fillRect(0, 0, sw, sh);
     this.tweens.add({
-      targets: fadeOut, alpha: 1, duration: 150, ease: "Linear",
+      targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
       onComplete: () => {
         destroy();
-        this.tweens.add({ targets: fadeOut, alpha: 0, duration: 150, ease: "Linear", onComplete: () => fadeOut.destroy() });
+        this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear", onComplete: () => fadeOut.destroy() });
       }
     });
   }
@@ -4830,15 +4830,19 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         this._restartLevel();
   }
   toggleGlitter(_0x34c21a) {
+    if (window.enableLDM) {
+      if (this._glitterEmitter) this._glitterEmitter.stop();
+      return; // ADDED THIS so it skips the rest of the function
+    }
     if (this._editorPlaytestActive) {
-      this._glitterEmitter.stop();
+      if (this._glitterEmitter) this._glitterEmitter.stop();
       return;
     }
 
     if (_0x34c21a) {
-      this._glitterEmitter.start();
+      if (this._glitterEmitter) this._glitterEmitter.start();
     } else {
-      this._glitterEmitter.stop();
+      if (this._glitterEmitter) this._glitterEmitter.stop();
     }
   }
   _setParticleTimeScale(timeScale) {
@@ -5631,7 +5635,7 @@ _buildSettingsPopup() {
     this.tweens.add({
         targets: innerContainer,
         scale: 1,
-        duration: 660,
+        duration: 0,
         ease: "Elastic.Out",
         easeParams: [1, 0.6]
     });
@@ -5758,11 +5762,11 @@ _buildSettingsPopup() {
       closePopup();
     });
 
-    this.tweens.add({ targets: dim, alpha: 1, duration: 250, ease: "Linear" });
+    this.tweens.add({ targets: dim, alpha: 1, duration: 0, ease: "Linear" });
     this.tweens.add({
       targets: inner,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -5786,10 +5790,10 @@ _buildSettingsPopup() {
         speedHack: 1.0,
         macroBot: false,
         practiceMusicSync: false,
-        showGlow: true,
+        showGlow: false,
         showEditorGlow: false,
         useDirectInternet: true,
-        enablePortalGuide: true,
+        enablePortalGuide: false,
         enableOrbGuide: false,
         enableMiniIcon: false,
         enableLDM: false,
@@ -6111,7 +6115,7 @@ _buildSettingsPopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6123,7 +6127,7 @@ _buildSettingsPopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6145,7 +6149,7 @@ _buildSettingsPopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6229,7 +6233,7 @@ _buildSettingsPopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6318,7 +6322,7 @@ _buildSettingsPopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6381,7 +6385,7 @@ _showwippopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6466,7 +6470,7 @@ _showwippopup() {
     this.tweens.add({
       targets: box,
       scale: { from: 0, to: 1 },
-      duration: 280,
+      duration: 0,
       ease: "Back.Out"
     });
   }
@@ -6605,13 +6609,13 @@ _showwippopup() {
   nextBtn.on("pointerdown", () => {
     nextGroup._pressed = true;
     this.tweens.killTweensOf(nextGroup);
-    this.tweens.add({ targets: nextGroup, scaleX: 1.26, scaleY: 1.26, duration: 300, ease: "Bounce.Out" });
+    this.tweens.add({ targets: nextGroup, scaleX: 1.26, scaleY: 1.26, duration: 0, ease: "Bounce.Out" });
   });
   nextBtn.on("pointerout", () => {
     if (nextGroup._pressed) {
       nextGroup._pressed = false;
       this.tweens.killTweensOf(nextGroup);
-      this.tweens.add({ targets: nextGroup, scaleX: 1, scaleY: 1, duration: 400, ease: "Bounce.Out" });
+      this.tweens.add({ targets: nextGroup, scaleX: 1, scaleY: 1, duration: 0, ease: "Bounce.Out" });
     }
   });
   nextBtn.on("pointerup", () => {
@@ -6633,7 +6637,7 @@ _showwippopup() {
   this.tweens.add({
     targets: panelContainer,
     scale: 1,
-    duration: 660,
+    duration: 0,
     ease: "Elastic.Out",
     easeParams: [1, 0.6]
   });
@@ -6758,7 +6762,7 @@ _showwippopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6805,8 +6809,8 @@ _showwippopup() {
     const cancelLabel = this.add.bitmapText(-2, -3, "goldFont", "Cancel", 38).setOrigin(0.5, 0.5);
     cancelGroup.add(cancelLabel);
     bounceContainer.add(cancelGroup);
-    cancelBtn.on("pointerdown", () => { cancelGroup._pressed = true; this.tweens.killTweensOf(cancelGroup); this.tweens.add({ targets: cancelGroup, scaleX: 1.26, scaleY: 1.26, duration: 300, ease: "Bounce.Out" }); });
-    cancelBtn.on("pointerout", () => { if (cancelGroup._pressed) { cancelGroup._pressed = false; this.tweens.killTweensOf(cancelGroup); this.tweens.add({ targets: cancelGroup, scaleX: 1, scaleY: 1, duration: 400, ease: "Bounce.Out" }); } });
+    cancelBtn.on("pointerdown", () => { cancelGroup._pressed = true; this.tweens.killTweensOf(cancelGroup); this.tweens.add({ targets: cancelGroup, scaleX: 1.26, scaleY: 1.26, duration: 0, ease: "Bounce.Out" }); });
+    cancelBtn.on("pointerout", () => { if (cancelGroup._pressed) { cancelGroup._pressed = false; this.tweens.killTweensOf(cancelGroup); this.tweens.add({ targets: cancelGroup, scaleX: 1, scaleY: 1, duration: 0, ease: "Bounce.Out" }); } });
     cancelBtn.on("pointerup", () => { if (cancelGroup._pressed) { cancelGroup._pressed = false; this.tweens.killTweensOf(cancelGroup); cancelGroup.setScale(1); this._closeNewgroundsPopup(); } });
     const openGroup = this.add.container(90, 65);
     const openBtnW = 125, openBtnH = 55;
@@ -6818,13 +6822,13 @@ _showwippopup() {
     const openLabel = this.add.bitmapText(-2, -3, "goldFont", "Open", 39).setOrigin(0.5, 0.5);
     openGroup.add(openLabel);
     bounceContainer.add(openGroup);
-    openBtn.on("pointerdown", () => { openGroup._pressed = true; this.tweens.killTweensOf(openGroup); this.tweens.add({ targets: openGroup, scaleX: 1.26, scaleY: 1.26, duration: 300, ease: "Bounce.Out" }); });
-    openBtn.on("pointerout", () => { if (openGroup._pressed) { openGroup._pressed = false; this.tweens.killTweensOf(openGroup); this.tweens.add({ targets: openGroup, scaleX: 1, scaleY: 1, duration: 400, ease: "Bounce.Out" }); } });
+    openBtn.on("pointerdown", () => { openGroup._pressed = true; this.tweens.killTweensOf(openGroup); this.tweens.add({ targets: openGroup, scaleX: 1.26, scaleY: 1.26, duration: 0, ease: "Bounce.Out" }); });
+    openBtn.on("pointerout", () => { if (openGroup._pressed) { openGroup._pressed = false; this.tweens.killTweensOf(openGroup); this.tweens.add({ targets: openGroup, scaleX: 1, scaleY: 1, duration: 0, ease: "Bounce.Out" }); } });
     openBtn.on("pointerup", () => { if (openGroup._pressed) { openGroup._pressed = false; this.tweens.killTweensOf(openGroup); openGroup.setScale(1); this._closeNewgroundsPopup(); window.open("https://www.newgrounds.com/audio", "_blank"); } });
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6868,13 +6872,13 @@ _showwippopup() {
     const okLabel = this.add.bitmapText(-3, -4, "goldFont", "OK", 44).setOrigin(0.5, 0.5);
     okGroup.add(okLabel);
     bounceContainer.add(okGroup);
-    okBtn.on("pointerdown", () => { okGroup._pressed = true; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1.26, scaleY: 1.26, duration: 300, ease: "Bounce.Out" }); });
-    okBtn.on("pointerout", () => { if (okGroup._pressed) { okGroup._pressed = false; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1, scaleY: 1, duration: 400, ease: "Bounce.Out" }); } });
+    okBtn.on("pointerdown", () => { okGroup._pressed = true; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1.26, scaleY: 1.26, duration: 0, ease: "Bounce.Out" }); });
+    okBtn.on("pointerout", () => { if (okGroup._pressed) { okGroup._pressed = false; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1, scaleY: 1, duration: 0, ease: "Bounce.Out" }); } });
     okBtn.on("pointerup", () => { if (okGroup._pressed) { okGroup._pressed = false; this.tweens.killTweensOf(okGroup); okGroup.setScale(1); this._closeFeaturedInfoPopup(); } });
         this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -6932,13 +6936,13 @@ _showwippopup() {
       icon.on("pointerdown", () => {
         icon._pressed = true;
         this.tweens.killTweensOf(icon, "scale");
-        this.tweens.add({ targets: icon, scale: baseScale * 1.15, duration: 300, ease: "Bounce.Out" });
+        this.tweens.add({ targets: icon, scale: baseScale * 1.15, duration: 0, ease: "Bounce.Out" });
       });
       icon.on("pointerout", () => {
         if (icon._pressed) {
           icon._pressed = false;
           this.tweens.killTweensOf(icon, "scale");
-          this.tweens.add({ targets: icon, scale: baseScale, duration: 400, ease: "Bounce.Out" });
+          this.tweens.add({ targets: icon, scale: baseScale, duration: 0, ease: "Bounce.Out" });
         }
       });
       icon.on("pointerup", () => {
@@ -6959,8 +6963,8 @@ _showwippopup() {
     const okLabel = this.add.bitmapText(-3, -4, "goldFont", "OK", 44).setOrigin(0.5, 0.5);
     okGroup.add(okLabel);
     bounceContainer.add(okGroup);
-    okBtn9.on("pointerdown", () => { okGroup._pressed = true; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1.26, scaleY: 1.26, duration: 300, ease: "Bounce.Out" }); });
-    okBtn9.on("pointerout", () => { if (okGroup._pressed) { okGroup._pressed = false; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1, scaleY: 1, duration: 400, ease: "Bounce.Out" }); } });
+    okBtn9.on("pointerdown", () => { okGroup._pressed = true; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1.26, scaleY: 1.26, duration: 0, ease: "Bounce.Out" }); });
+    okBtn9.on("pointerout", () => { if (okGroup._pressed) { okGroup._pressed = false; this.tweens.killTweensOf(okGroup); this.tweens.add({ targets: okGroup, scaleX: 1, scaleY: 1, duration: 0, ease: "Bounce.Out" }); } });
     okBtn9.on("pointerup", () => {
       if (!okGroup._pressed) return;
       okGroup._pressed = false;
@@ -6979,7 +6983,7 @@ _showwippopup() {
     this.tweens.add({
       targets: bounceContainer,
       scale: { from: 0, to: 1 },
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6]
     });
@@ -7048,7 +7052,7 @@ _showwippopup() {
             targets: entry.target,
             scaleX: entry.baseScaleX,
             scaleY: entry.baseScaleY,
-            duration: 400,
+            duration: 0,
             ease: "Bounce.Out"
           });
         }
@@ -7200,68 +7204,68 @@ _showwippopup() {
     if (this._menuStatsBtn) {
       this._menuStatsBtn.setVisible(false);
     }
-    _dismiss(this._playBtn, { scale: 0.01, duration: 200, ease: "Quad.In" }, () => {
+    _dismiss(this._playBtn, { scale: 0.01, duration: 0, ease: "Quad.In" }, () => {
       this._playBtn.destroy();
       this._playBtn = null;
     });
     //icon stuff the threequel
     if (this._iconBtn) {
       this._closeIconSelector && this._closeIconSelector(true);
-      _dismiss(this._iconBtn, { scale: 0.01, duration: 200, ease: "Quad.In" }, () => {
+      _dismiss(this._iconBtn, { scale: 0.01, duration: 0, ease: "Quad.In" }, () => {
         this._iconBtn.destroy();
         this._iconBtn = null;
       });
     }
-    _dismiss(this._chrSelDecor, { y: screenHeight + 100, alpha: 0, duration: 200, ease: "Quad.In" }, () => {
+    _dismiss(this._chrSelDecor, { y: screenHeight + 100, alpha: 0, duration: 0, ease: "Quad.In" }, () => {
       if (this._chrSelDecor) { this._chrSelDecor.destroy(); this._chrSelDecor = null; }
     });
-    _dismiss(this._lvlEditDecor, { y: screenHeight + 100, alpha: 0, duration: 200, ease: "Quad.In" }, () => {
+    _dismiss(this._lvlEditDecor, { y: screenHeight + 100, alpha: 0, duration: 0, ease: "Quad.In" }, () => {
       if (this._lvlEditDecor) { this._lvlEditDecor.destroy(); this._lvlEditDecor = null; }
     });
     //creator stuff the threequel
     if (this._creatorBtn) {
       this._closeCreatorMenu && this._closeCreatorMenu(true);
       this._closeSearchMenu && this._closeSearchMenu(true);
-      _dismiss(this._creatorBtn, { scale: 0.01, duration: 200, ease: "Quad.In" }, () => {
+      _dismiss(this._creatorBtn, { scale: 0.01, duration: 0, ease: "Quad.In" }, () => {
         this._creatorBtn.destroy();
         this._creatorBtn = null;
       });
     }
-    _dismiss(this._robLogo, { y: screenHeight + (this._robLogo ? this._robLogo.height : 0), duration: 300, ease: "Quad.In" }, () => {
+    _dismiss(this._robLogo, { y: screenHeight + (this._robLogo ? this._robLogo.height : 0), duration: 0, ease: "Quad.In" }, () => {
       this._robLogo.destroy();
       this._robLogo = null;
     });
-    _dismiss(this._copyrightText, { y: 680, duration: 300, ease: "Quad.In" }, () => {
+    _dismiss(this._copyrightText, { y: 680, duration: 0, ease: "Quad.In" }, () => {
       this._copyrightText.destroy();
       this._copyrightText = null;
     });
-    _dismiss(this._menuFsBtn, { y: this._menuFsBtn ? -this._menuFsBtn.height : 0, duration: 300, ease: "Quad.In" }, () => {
+    _dismiss(this._menuFsBtn, { y: this._menuFsBtn ? -this._menuFsBtn.height : 0, duration: 0, ease: "Quad.In" }, () => {
       this._menuFsBtn.destroy();
       this._menuFsBtn = null;
     });
-    _dismiss(this._menuInfoBtn, { y: this._menuInfoBtn ? -this._menuInfoBtn.height : 0, duration: 300, ease: "Quad.In" }, () => {
+    _dismiss(this._menuInfoBtn, { y: this._menuInfoBtn ? -this._menuInfoBtn.height : 0, duration: 0, ease: "Quad.In" }, () => {
       this._menuInfoBtn.destroy();
       this._menuInfoBtn = null;
     });
     this._closeInfoPopup();
     this._closeUpdateLogPopup();
-    _dismiss(this._tryMeImg, { y: this._tryMeImg ? -this._tryMeImg.height : 0, duration: 300, ease: "Quad.In" }, () => {
+    _dismiss(this._tryMeImg, { y: this._tryMeImg ? -this._tryMeImg.height : 0, duration: 0, ease: "Quad.In" }, () => {
       this._tryMeImg.destroy();
       this._tryMeImg = null;
     });
     if (this._downloadBtns) {
       for (const _0xaa3a95 of this._downloadBtns) {
-        _dismiss(_0xaa3a95, { y: screenHeight + _0xaa3a95.height, duration: 300, ease: "Quad.In" }, () => _0xaa3a95.destroy());
+        _dismiss(_0xaa3a95, { y: screenHeight + _0xaa3a95.height, duration: 0, ease: "Quad.In" }, () => _0xaa3a95.destroy());
       }
       this._downloadBtns = null;
     }
     if (this._socialIcons && this._socialIcons.length > 0) {
       for (const _icon of this._socialIcons) {
-        _dismiss(_icon, { y: screenHeight + 64, duration: 300, ease: "Quad.In" }, () => _icon.destroy());
+        _dismiss(_icon, { y: screenHeight + 64, duration: 0, ease: "Quad.In" }, () => _icon.destroy());
       }
       this._socialIcons = [];
     }
-    _dismiss(this._logo, { y: this._logo ? -this._logo.height : 0, duration: 300, ease: "Quad.In" }, () => {
+    _dismiss(this._logo, { y: this._logo ? -this._logo.height : 0, duration: 0, ease: "Quad.In" }, () => {
       this._logo.destroy();
       this._logo = null;
     });
@@ -7527,7 +7531,7 @@ _showwippopup() {
       this.tweens.add({
         targets: this._iconBtn,
         y: 324,
-        duration: 750,
+        duration: 0,
         ease: "Quad.InOut",
         yoyo: true,
         repeat: -1
@@ -8452,7 +8456,7 @@ _showwippopup() {
         this.tweens.add({
           targets: this._pauseBtn,
           alpha: 75 / 255,
-          duration: 500
+          duration: 0
         });
         if (this._practiceModeBarContainer) {
           this._practiceModeBarContainer.setVisible(this._practicedMode && this._practicedMode.practiceMode);
@@ -8571,7 +8575,7 @@ _showwippopup() {
         }
       }
       this._deathTimer += deltaTime;
-      let _0x237728 = this._hadNewBest ? 1400 : 1000;
+      let _0x237728 = this._hadNewBest ? 1400 : 500;
       if (this._deathTimer > _0x237728) {
         if (this._practicedMode.practiceMode) {
           this._respawnFromCheckpoint();
@@ -8622,52 +8626,58 @@ _showwippopup() {
         _oSpr.rotation = baseRotation + gravityGuideRotation;
       }
     }
+if (!window.enableLDM) {
     this._level.updateAudioScale(this._audio.getMeteringValue());
+}
     if (!this._orbGfx) {
       this._orbGfx = this.add.graphics().setDepth(54).setBlendMode(S);
     }
-    this._orbParticleAngle = ((this._orbParticleAngle || 0) + deltaTime * 0.004) % (Math.PI * 2);
-    this._orbGfxTimer = (this._orbGfxTimer || 0) + deltaTime;
-    if (this._orbGfxTimer > 33) {
-      this._orbGfxTimer = 0;
-      this._orbGfx.clear();
-      if (this._level && this._level._orbSprites && this._level.container) {
-        try {
-        let _drawn = 0;
-        const _orbTypeColorMap = {
-          36: 0xfffb57,
-          84: 0x58ffff,
-          141: 0xff52f0,
-          444: 0xff00d2,
-          1022: 0x63ff5f,
-          1330: 0xffffff,
-          1333: 0xff6326,
-          1594: 0x6cff6b,
-          1704: 0x04ff04,
-          1751: 0xff00d2
-        };
-        for (let _oSpr of this._level._orbSprites) {
-          if (_drawn >= 4) break;
-          if (!_oSpr || !_oSpr.visible || !_oSpr.active || !_oSpr.scene) continue;
-          const _sx = _oSpr.x + this._level.container.x;
-          const _sy = _oSpr.y + this._level.container.y;
-          if (_sx < -40 || _sx > screenWidth + 40 || _sy < -40 || _sy > screenHeight + 40) continue;
-          _drawn++;
-          const _orbTypeTint = _orbTypeColorMap[_oSpr._orbId];
-          for (let _pi = 0; _pi < 5; _pi++) {
-            const _orbitSpeed = 0.7 + (_pi % 3) * 0.35;
-            const _orbitR = 34 + (_pi * 5 % 17);
-            const _ang = this._orbParticleAngle * _orbitSpeed + (_pi * Math.PI * 2 / 5);
-            const _px = _sx + Math.cos(_ang) * _orbitR;
-            const _py = _sy + Math.sin(_ang) * (_orbitR * 0.85);
-            const _size = (window.orbParticleSize || 3.5) + (_pi % 3) * 1.0;
-            const _alpha = 0.5 + (_pi % 4) * 0.12;
-            this._orbGfx.fillStyle(_orbTypeTint, _alpha);
-            this._orbGfx.fillRect(_px - _size, _py - _size, _size * 2, _size * 2);
-          }
+    if (!window.enableLDM) {
+      this._orbParticleAngle = ((this._orbParticleAngle || 0) + deltaTime * 0.004) % (Math.PI * 2);
+      this._orbGfxTimer = (this._orbGfxTimer || 0) + deltaTime;
+      if (this._orbGfxTimer > 33) {
+        this._orbGfxTimer = 0;
+        this._orbGfx.clear();
+        if (this._level && this._level._orbSprites && this._level.container) {
+          try {
+            let _drawn = 0;
+            const _orbTypeColorMap = {
+              36: 0xfffb57,
+              84: 0x58ffff,
+              141: 0xff52f0,
+              444: 0xff00d2,
+              1022: 0x63ff5f,
+              1330: 0xffffff,
+              1333: 0xff6326,
+              1594: 0x6cff6b,
+              1704: 0x04ff04,
+              1751: 0xff00d2
+            };
+            for (let _oSpr of this._level._orbSprites) {
+              if (_drawn >= 4) break;
+              if (!_oSpr || !_oSpr.visible || !_oSpr.active || !_oSpr.scene) continue;
+              const _sx = _oSpr.x + this._level.container.x;
+              const _sy = _oSpr.y + this._level.container.y;
+              if (_sx < -40 || _sx > screenWidth + 40 || _sy < -40 || _sy > screenHeight + 40) continue;
+              _drawn++;
+              const _orbTypeTint = _orbTypeColorMap[_oSpr._orbId];
+              for (let _pi = 0; _pi < 5; _pi++) {
+                const _orbitSpeed = 0.7 + (_pi % 3) * 0.35;
+                const _orbitR = 34 + (_pi * 5 % 17);
+                const _ang = this._orbParticleAngle * _orbitSpeed + (_pi * Math.PI * 2 / 5);
+                const _px = _sx + Math.cos(_ang) * _orbitR;
+                const _py = _sy + Math.sin(_ang) * (_orbitR * 0.85);
+                const _size = (window.orbParticleSize || 3.5) + (_pi % 3) * 1.0;
+                const _alpha = 0.5 + (_pi % 4) * 0.12;
+                this._orbGfx.fillStyle(_orbTypeTint, _alpha);
+                this._orbGfx.fillRect(_px - _size, _py - _size, _size * 2, _size * 2);
+              }
+            }
+          } catch(e) {}
         }
-        } catch(e) {}
       }
+    } else if (this._orbGfx) {
+      this._orbGfx.clear();
     }
     let quantizedDelta = this._quantizeDelta(deltaTime);
     let subSteps = quantizedDelta > 0 ? Math.max(1, Math.round(quantizedDelta * 4)) : 0;
@@ -8765,18 +8775,27 @@ _showwippopup() {
         }
       }
 
-      if (!this._player._scene._slideIn){
-        if (!this._player._hitboxTrail) this._player._hitboxTrail = [];
-        if (!this._player.p.isDead) {
-          const _trailSize = this._player.p.isMini ? 18 : 30;
-          this._player._hitboxTrail.push({ x: this._playerWorldX, y: this._player.p.y, rotation: this._player._rotation, size: _trailSize, isWave: this._player.p.isWave });
-          if (this._player._hitboxTrail.length > 180) this._player._hitboxTrail.shift();
-        }
-        if (this._isDual && !this._player2.p.isDead) {
-          if (!this._player2._hitboxTrail) this._player2._hitboxTrail = [];
-          const _trailSize2 = this._player2.p.isMini ? 18 : 30;
-          this._player2._hitboxTrail.push({ x: this._playerWorldX, y: this._player2.p.y, rotation: this._player2._rotation, size: _trailSize2, isWave: this._player2.p.isWave });
-          if (this._player2._hitboxTrail.length > 180) this._player2._hitboxTrail.shift();
+      if (!this._player._scene._slideIn) {
+        if (!window.enableLDM) {
+          if (!this._player._hitboxTrail) this._player._hitboxTrail = [];
+          if (!this._player.p.isDead) {
+            const _trailSize = this._player.p.isMini ? 18 : 30;
+            this._player._hitboxTrail.push({ x: this._playerWorldX, y: this._player.p.y, rotation: this._player._rotation, size: _trailSize, isWave: this._player.p.isWave });
+            if (this._player._hitboxTrail.length > 180) this._player._hitboxTrail.shift();
+          }
+          if (this._isDual && !this._player2.p.isDead) {
+            if (!this._player2._hitboxTrail) this._player2._hitboxTrail = [];
+            const _trailSize2 = this._player2.p.isMini ? 18 : 30;
+            this._player2._hitboxTrail.push({ x: this._playerWorldX, y: this._player2.p.y, rotation: this._player2._rotation, size: _trailSize2, isWave: this._player2.p.isWave });
+            if (this._player2._hitboxTrail.length > 180) this._player2._hitboxTrail.shift();
+          }
+        } else {
+          if (this._player._hitboxTrail && this._player._hitboxTrail.length > 0) {
+            this._player._hitboxTrail = [];
+          }
+          if (this._isDual && this._player2._hitboxTrail && this._player2._hitboxTrail.length > 0) {
+            this._player2._hitboxTrail = [];
+          }
         }
       }
 
@@ -9325,14 +9344,14 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: _0x326cb9,
       scale: 1,
-      duration: 400,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6],
       onComplete: () => {
         this.tweens.add({
           targets: _0x326cb9,
           scale: 0.01,
-          duration: 200,
+          duration: 0,
           delay: 700,
           ease: "Quad.In",
           onComplete: () => {
@@ -9477,14 +9496,14 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: _0x45ab26,
       scale: 1.1,
-      duration: 660,
+      duration: 0,
       ease: "Elastic.Out",
       easeParams: [1, 0.6],
       onComplete: () => {
         this.tweens.add({
           targets: _0x45ab26,
           scale: 0.01,
-          duration: 220,
+          duration: 0,
           delay: 880,
           ease: "Quad.In",
           onComplete: () => {
@@ -9550,7 +9569,7 @@ _applyMirrorEffect() {
       this.tweens.add({
         targets: this._pauseBtn,
         alpha: 0,
-        duration: 300
+        duration: 0
       });
     }
     const containerX = screenWidth / 2;
@@ -9560,7 +9579,7 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: this._endLayerOverlay,
       alpha: 100 / 255,
-      duration: 1000
+      duration: 0
     });
     const _0x59b9ab = {
       p: 0
@@ -9568,7 +9587,7 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: _0x59b9ab,
       p: 1,
-      duration: 1000,
+      duration: 0,
       ease: "Bounce.Out",
       onUpdate: () => {
         this._endLayerInternal.y = _0x59b9ab.p * 650 - 640;
@@ -9742,7 +9761,7 @@ _applyMirrorEffect() {
       this.tweens.add({
         targets: this._pauseBtn,
         alpha: 0,
-        duration: 300
+        duration: 0
       });
     }
 
@@ -9755,7 +9774,7 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: this._helpoverlay,
       alpha: 180 / 255,
-      duration: 250,
+      duration: 0,
       ease: "Linear"
     });
 
@@ -9765,7 +9784,7 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: _0x59b9ab,
       p: 1,
-      duration: 450,
+      duration: 0,
       ease: "Quad.Out",
       onUpdate: () => {
         this._helplayer.y = _0x59b9ab.p * 650 - 640;
@@ -9821,13 +9840,13 @@ _applyMirrorEffect() {
       hitZone.on("pointerdown", () => {
         hitZone._pressed = true;
         this.tweens.killTweensOf(grp, "scale");
-        this.tweens.add({ targets: grp, scale: pressedScale, duration: 300, ease: "Bounce.Out" });
+        this.tweens.add({ targets: grp, scale: pressedScale, duration: 0, ease: "Bounce.Out" });
       });
       hitZone.on("pointerout", () => {
         if (hitZone._pressed) {
           hitZone._pressed = false;
           this.tweens.killTweensOf(grp, "scale");
-          this.tweens.add({ targets: grp, scale: baseScale, duration: 400, ease: "Bounce.Out" });
+          this.tweens.add({ targets: grp, scale: baseScale, duration: 0, ease: "Bounce.Out" });
         }
       });
       hitZone.on("pointerup", () => {
@@ -9860,7 +9879,7 @@ _applyMirrorEffect() {
     var ldmIsOn = window.enableLDM;
     var ldmCheckTexture = ldmIsOn ? "GJ_checkOn_001.png" : "GJ_checkOff_001.png";
     var ldmCheck = this.add.image(ldmX + ldmCheckOffset, ldmY, "GJ_GameSheet03", ldmCheckTexture).setScale(0.8).setInteractive();
-    var ldmTxt = this.add.bitmapText(ldmX + ldmTextOffset, ldmY, "bigFont", "Low Detail Mode", 25).setOrigin(0, 0.5);
+    var ldmTxt = this.add.bitmapText(ldmX + ldmTextOffset, ldmY, "bigFont", "Ultra Low Detail Mode", 25).setOrigin(0, 0.5);
     this._helplayer.add([ldmCheck, ldmTxt]);
 
     this._makeBouncyButton(ldmCheck, 0.8, () => {
@@ -9893,7 +9912,7 @@ _applyMirrorEffect() {
       this.tweens.add({
         targets: this._pauseBtn,
         alpha: 0,
-        duration: 300
+        duration: 0
       });
     }
 
@@ -9905,7 +9924,7 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: this._songsoverlay,
       alpha: 100 / 255,
-      duration: 1000
+      duration: 0
     });
 
     const _0x59b9ab = {
@@ -9914,7 +9933,7 @@ _applyMirrorEffect() {
     this.tweens.add({
       targets: _0x59b9ab,
       p: 1,
-      duration: 500,
+      duration: 0,
       ease: "Quad.Out",
       onUpdate: () => {
         this._songslayer.y = _0x59b9ab.p * 650 - 640;
@@ -9957,7 +9976,7 @@ _applyMirrorEffect() {
     }
     this._songpopupclose = false;
     if (this._pauseBtn) {
-      this.tweens.add({ targets: this._pauseBtn, alpha: 1, duration: 300 });
+      this.tweens.add({ targets: this._pauseBtn, alpha: 1, duration: 0 });
     }
   }
 
@@ -9970,7 +9989,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       this.tweens.add({
         targets: this._pauseBtn,
         alpha: 0,
-        duration: 300
+        duration: 0
       });
     }
     const containerX = screenWidth / 2;
@@ -9981,7 +10000,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: this._settingsLayerOverlay,
       alpha: 180 / 255,
-      duration: 400,
+      duration: 0,
       ease: "Linear"
     });
 
@@ -9991,7 +10010,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x59b9ab,
       p: 1,
-      duration: 500,
+      duration: 0,
       ease: "Quad.Out",
       onUpdate: () => {
         this._settingsLayerInternal.y = _0x59b9ab.p * 650 - 640;
@@ -10043,13 +10062,13 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
             hitZone.on("pointerdown", () => {
                 hitZone._pressed = true;
                 this.tweens.killTweensOf(grp, "scale");
-                this.tweens.add({ targets: grp, scale: pressedScale, duration: 300, ease: "Bounce.Out" });
+                this.tweens.add({ targets: grp, scale: pressedScale, duration: 0, ease: "Bounce.Out" });
             });
             hitZone.on("pointerout", () => {
                 if (hitZone._pressed) {
                     hitZone._pressed = false;
                     this.tweens.killTweensOf(grp, "scale");
-                    this.tweens.add({ targets: grp, scale: baseScale, duration: 400, ease: "Bounce.Out" });
+                    this.tweens.add({ targets: grp, scale: baseScale, duration: 0, ease: "Bounce.Out" });
                 }
             });
             hitZone.on("pointerup", () => {
@@ -10162,7 +10181,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       targets: _0x453043,
       scale: 0.8,
       alpha: 1,
-      duration: 300,
+      duration: 0,
       delay: 0,
       ease: "Bounce.Out"
     });
@@ -10187,7 +10206,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
         this.tweens.add({
           targets: this._pauseBtn,
           alpha: 1,
-          duration: 300
+          duration: 0
         });
       }
 
@@ -10198,7 +10217,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: this._settingsLayerOverlay,
       alpha: 0,
-      duration: 250,
+      duration: 0,
       ease: "Linear"
     });
 
@@ -10208,7 +10227,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x59b9ab,
       p: 0,
-      duration: 450,
+      duration: 0,
       ease: "Quad.In",
       onUpdate: () => {
         this._settingsLayerInternal.y = _0x59b9ab.p * 650 - 640;
@@ -10236,14 +10255,14 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
         this.tweens.add({
           targets: this._pauseBtn,
           alpha: 1,
-          duration: 300
+          duration: 0
         });
       }
     };
     this.tweens.add({
       targets: this._helpoverlay,
       alpha: 0,
-      duration: 250,
+      duration: 0,
       ease: "Linear"
     });
 
@@ -10253,7 +10272,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x59b9ab,
       p: 0,
-      duration: 450,
+      duration: 0,
       ease: "Quad.In",
       onUpdate: () => {
         this._helplayer.y = _0x59b9ab.p * 650 - 640;
@@ -10286,14 +10305,14 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
         this.tweens.add({
           targets: this._pauseBtn,
           alpha: 1,
-          duration: 300
+          duration: 0
         });
       }
     };
     this.tweens.add({
       targets: this._songsoverlay,
       alpha: 0,
-      duration: 250,
+      duration: 0,
       ease: "Linear"
     });
 
@@ -10303,7 +10322,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x59b9ab,
       p: 0,
-      duration: 450,
+      duration: 0,
       ease: "Quad.In",
       onUpdate: () => {
         this._songslayer.y = _0x59b9ab.p * 650 - 640;
@@ -10316,7 +10335,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       this.tweens.add({
         targets: this._pauseBtn,
         alpha: 0,
-        duration: 300
+        duration: 0
       });
     }
     const containerX = screenWidth / 2;
@@ -10326,7 +10345,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: this._statsLayerOverlay,
       alpha: 100 / 255,
-      duration: 1000
+      duration: 0
     });
     const _0x59b9ab = {
       p: 0
@@ -10334,7 +10353,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x59b9ab,
       p: 1,
-      duration: 500,
+      duration: 0,
       ease: "Quad.Out",
       onUpdate: () => {
         this._statsLayerInternal.y = _0x59b9ab.p * 650 - 640;
@@ -10419,14 +10438,14 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
         this.tweens.add({
           targets: this._pauseBtn,
           alpha: 1,
-          duration: 300
+          duration: 0
         });
       }
     };
     this.tweens.add({
       targets: this._statsLayerOverlay,
       alpha: 0,
-      duration: 500,
+      duration: 0,
       ease: "Linear"
     });
     const _0x59b9ab = {
@@ -10435,7 +10454,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x59b9ab,
       p: 0,
-      duration: 500,
+      duration: 0,
       ease: "Quad.In",
       onUpdate: () => {
         this._statsLayerInternal.y = _0x59b9ab.p * 650 - 640;
@@ -10455,7 +10474,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       targets: _0x453043,
       scale: 0.8,
       alpha: 1,
-      duration: 300,
+      duration: 0,
       delay: 0,
       ease: "Bounce.Out"
     });
@@ -10497,7 +10516,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       this.tweens.add({
         targets: _0x403316,
         t: 1,
-        duration: 400,
+        duration: 0,
         ease: "Quad.Out",
         onUpdate: () => {
           _0x43203f.clear();
@@ -10561,7 +10580,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
           this.tweens.add({
             targets: glowState,
             progress: 1,
-            duration: 400,
+            duration: 0,
             ease: "Quad.Out",
             onUpdate: () => {
               glow.clear();
@@ -10620,7 +10639,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
           this.tweens.add({
             targets: glowState,
             progress: 1,
-            duration: 400,
+            duration: 0,
             ease: "Quad.Out",
             onUpdate: () => {
               glow.clear();
@@ -10642,7 +10661,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(300);
     fadeIn.fillStyle(0x000000, 1);
     fadeIn.fillRect(0, 0, sw, sh);
-    this.tweens.add({ targets: fadeIn, alpha: 0, duration: 280, ease: "Linear",
+    this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear",
       onComplete: () => fadeIn.destroy() });
 
     const bgGfx = this.add.graphics().setScrollFactor(0).setDepth(200);
@@ -10738,12 +10757,12 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       const fadeOut = this.add.graphics().setScrollFactor(0).setDepth(400).setAlpha(0);
       fadeOut.fillStyle(0x000000, 1);
       fadeOut.fillRect(0, 0, sw, sh);
-      this.tweens.add({ targets: fadeOut, alpha: 1, duration: 160, ease: "Linear",
+      this.tweens.add({ targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
         onComplete: () => {
           for (const o of objects) if (o && o.destroy) o.destroy();
           if (returnToParent && onBack) onBack();
           if (onComplete) onComplete();
-          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 160, ease: "Linear",
+          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear",
             onComplete: () => fadeOut.destroy() });
         }
       });
@@ -11039,13 +11058,13 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       btn9.on("pointerdown", () => {
         btn9._pressed = true;
         this.tweens.killTweensOf(_btnTargets, "scale");
-        this.tweens.add({ targets: _btnTargets, scale: _pressScale, duration: 300, ease: "Bounce.Out" });
+        this.tweens.add({ targets: _btnTargets, scale: _pressScale, duration: 0, ease: "Bounce.Out" });
       });
       btn9.on("pointerout", () => {
         if (btn9._pressed) {
           btn9._pressed = false;
           this.tweens.killTweensOf(_btnTargets, "scale");
-          this.tweens.add({ targets: _btnTargets, scale: _baseScale, duration: 400, ease: "Bounce.Out" });
+          this.tweens.add({ targets: _btnTargets, scale: _baseScale, duration: 0, ease: "Bounce.Out" });
         }
       });
       btn9.on("pointerup", () => {
@@ -11317,7 +11336,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
         bounceBackTween = this.tweens.add({
           targets: { scrollOffset: startOffset },
           scrollOffset: targetScrollOffset,
-          duration: 300,
+          duration: 0,
           ease: "Quad.Out",
           onStart: () => {
             isDragging = false;
@@ -11365,7 +11384,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     const fadeIn = this.add.graphics().setScrollFactor(0).setDepth(300);
     fadeIn.fillStyle(0x000000, 1);
     fadeIn.fillRect(0, 0, sw, sh);
-    this.tweens.add({ targets: fadeIn, alpha: 0, duration: 280, ease: "Linear",
+    this.tweens.add({ targets: fadeIn, alpha: 0, duration: 0, ease: "Linear",
       onComplete: () => fadeIn.destroy() });
 
     const bgGfx = this.add.graphics().setScrollFactor(0).setDepth(200);
@@ -11462,12 +11481,12 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       const fadeOut = this.add.graphics().setScrollFactor(0).setDepth(400).setAlpha(0);
       fadeOut.fillStyle(0x000000, 1);
       fadeOut.fillRect(0, 0, sw, sh);
-      this.tweens.add({ targets: fadeOut, alpha: 1, duration: 160, ease: "Linear",
+      this.tweens.add({ targets: fadeOut, alpha: 1, duration: 0, ease: "Linear",
         onComplete: () => {
           for (const o of objects) if (o && o.destroy) o.destroy();
           if (returnToCreator) this._openCreatorMenu();
           if (onComplete) onComplete();
-          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 160, ease: "Linear",
+          this.tweens.add({ targets: fadeOut, alpha: 0, duration: 0, ease: "Linear",
             onComplete: () => fadeOut.destroy() });
         }
       });
@@ -11693,13 +11712,13 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
       btn9.on("pointerdown", () => {
         btn9._pressed = true;
         this.tweens.killTweensOf(_btnTargets, "scale");
-        this.tweens.add({ targets: _btnTargets, scale: _pressScale, duration: 300, ease: "Bounce.Out" });
+        this.tweens.add({ targets: _btnTargets, scale: _pressScale, duration: 0, ease: "Bounce.Out" });
       });
       btn9.on("pointerout", () => {
         if (btn9._pressed) {
           btn9._pressed = false;
           this.tweens.killTweensOf(_btnTargets, "scale");
-          this.tweens.add({ targets: _btnTargets, scale: _baseScale, duration: 400, ease: "Bounce.Out" });
+          this.tweens.add({ targets: _btnTargets, scale: _baseScale, duration: 0, ease: "Bounce.Out" });
         }
       });
       btn9.on("pointerup", () => {
@@ -12061,13 +12080,13 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     btn9.on("pointerdown", () => {
       btn9._pressed = true;
       this.tweens.killTweensOf(_btnTargets, "scale");
-      this.tweens.add({ targets: _btnTargets, scale: _pressScale, duration: 300, ease: "Bounce.Out" });
+      this.tweens.add({ targets: _btnTargets, scale: _pressScale, duration: 0, ease: "Bounce.Out" });
     });
     btn9.on("pointerout", () => {
       if (btn9._pressed) {
         btn9._pressed = false;
         this.tweens.killTweensOf(_btnTargets, "scale");
-        this.tweens.add({ targets: _btnTargets, scale: _baseScale, duration: 400, ease: "Bounce.Out" });
+        this.tweens.add({ targets: _btnTargets, scale: _baseScale, duration: 0, ease: "Bounce.Out" });
       }
     });
     btn9.on("pointerup", () => {
@@ -12115,7 +12134,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: _0x1215e0,
       p: 1,
-      duration: 500,
+      duration: 0,
       ease: _0xc1c75 => _0xc1c75 < 0.5 ? Math.pow(_0xc1c75 * 2, 2) / 2 : 1 - Math.pow((1 - _0xc1c75) * 2, 2) / 2,
       onUpdate: () => {
         this._endLayerInternal.y = _0x1215e0.p * -640;
@@ -12135,7 +12154,7 @@ window.open("https://github.com/web-dashers/web-dashers.github.io", "_blank"); }
     this.tweens.add({
       targets: this._endLayerOverlay,
       alpha: 0,
-      duration: 500
+      duration: 0
     });
   }
 }

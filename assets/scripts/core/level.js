@@ -1735,6 +1735,7 @@ window.LevelObject = class LevelObject {
     }
   }
   _hasGlow(objectDef = null, objectData = null) {
+    if(window.enableLDM) return false;
     const source = objectDef || objectData || {};
     if (!source) return false;
     return !!(
@@ -3299,12 +3300,14 @@ window.LevelObject = class LevelObject {
       this._endPortalContainer.add(_0xacf7ef);
     }
     this.container.add(this._endPortalContainer);
+if (!window.enableLDM) {
     this._endPortalShine = _0x41fbdb.add.image(_0x3b56d4 - 58, _0x1c3aea, "GJ_WebSheet", "gradientBar.png");
     const _0x3e25a9 = ((_0x400605 = _0x41fbdb.textures.getFrame("GJ_WebSheet", "gradientBar.png")) == null ? undefined : _0x400605.height) || 64;
     this._endPortalShine.setBlendMode(S);
     this._endPortalShine.setTint(window.mainColor);
     this._endPortalShine.setScale(1, 960 / _0x3e25a9);
     this.additiveContainer.add(this._endPortalShine);
+}
     if (window.enableLDM) {
       this._endPortalGameY = 240;
       return;
@@ -3365,7 +3368,11 @@ window.LevelObject = class LevelObject {
     _0x1be4c3 = _0x43c4d1 ? _0x50aa7d : Math.max(240, _0x50aa7d);
     const _0x32e645 = b(_0x1be4c3);
     this._endPortalContainer.y = _0x32e645;
-    this._endPortalShine.y = _0x32e645;
+    
+    if (this._endPortalShine) {
+      this._endPortalShine.y = _0x32e645;
+    }
+    
     if (this._endPortalEmitter) {
       this._endPortalEmitter.y = _0x32e645;
     }
@@ -4627,6 +4634,7 @@ window.LevelObject = class LevelObject {
     }
   }
   updateAudioScale(_0x337bf7, cameraX = -Infinity, viewportWidth = Infinity) {
+    if (window.enableLDM) return;
     const _meterValue = Number.isFinite(Number(_0x337bf7)) ? Number(_0x337bf7) : 0;
     const _maxaudioScale = 1.5; //added this cuz god DAMN whe the game lags they get big.
     const _targetAudioScale = Math.min(_maxaudioScale, Math.max(0, _meterValue));
