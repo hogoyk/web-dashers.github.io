@@ -120,6 +120,11 @@ function parseObject(objectString) {
       flipY: objectData[5] === "1",
       rot: parseFloat(objectData[6] || "0"),
       scale: parseFloat(objectData[32] || "1"),
+      // GD 2.2 scale X/Y (128/129; old levels only have 32) and warp (131/132: extra angle of the X / Y axis)
+      scaleX: parseFloat(objectData[128] ?? objectData[32] ?? "1") || 1,
+      scaleY: parseFloat(objectData[129] ?? objectData[32] ?? "1") || 1,
+      skewX: parseFloat(objectData[131] || "0") || 0,
+      skewY: parseFloat(objectData[132] || "0") || 0,
       editorLayer: parseInt(objectData[20] || "0", 10),
       zLayer: parseInt(objectData[24] || "0", 10),
       zOrder: parseInt(objectData[25] || "0", 10),
@@ -441,10 +446,9 @@ function _createSlopeCollider(levelObj, objectDef, worldX, worldY) {
   if (!slopeData) return null;
   if (slopeData.sq) return null;
   if (_isDecorationSlopeId(levelObj.id)) return null;
-  const _scaleRaw = Number(levelObj.scale);
-  const _scale = Number.isFinite(_scaleRaw) && _scaleRaw > 0 ? _scaleRaw : 1;
-  const hw0 = (slopeData.gw * a * _scale) / 2;
-  const hh0 = (slopeData.gh * a * _scale) / 2;
+  const { sx: _scaleX, sy: _scaleY } = objectScaleWarp(levelObj);
+  const hw0 = (slopeData.gw * a * Math.abs(_scaleX)) / 2;
+  const hh0 = (slopeData.gh * a * Math.abs(_scaleY)) / 2;
   let vRight = { x: hw0, y: -hh0 };
   let vLo = { x: -hw0, y: -hh0 };
   let vHi = { x: hw0, y: hh0 };
@@ -645,6 +649,43 @@ const USER_COIN_ANIM_FRAMES = [
 function getObjectFromId(id) {
   return allObjects[id] || null;
 }
+
+// Object scale X/Y and warp in degrees, from a parsed level object (old levels only have the uniform scale).
+function objectScaleWarp(o) {
+  const s = Number.isFinite(Number(o?.scale)) && Number(o.scale) !== 0 ? Number(o.scale) : 1;
+  const sx = Number.isFinite(Number(o?.scaleX)) && Number(o.scaleX) !== 0 ? Number(o.scaleX) : s;
+  const sy = Number.isFinite(Number(o?.scaleY)) && Number(o.scaleY) !== 0 ? Number(o.scaleY) : s;
+  return { sx, sy, kx: Number(o?.skewX) || 0, ky: Number(o?.skewY) || 0 };
+}
+
+// Warp: Phaser can only rotate and scale a sprite, so for a warped sprite (_eeWarp = angle of its Y axis
+// relative to its X axis) the transform built while it renders gets its Y axis turned by that extra angle.
+(function installWarpRendering() {
+  if (typeof Phaser === "undefined" || installWarpRendering.done) return;
+  installWarpRendering.done = true;
+  let warped = null;
+  for (const cls of [Phaser.GameObjects.Image, Phaser.GameObjects.Sprite]) {
+    const proto = cls && cls.prototype;
+    if (!proto || !proto.renderWebGL) continue;
+    const render = proto.renderWebGL;
+    proto.renderWebGL = function (renderer, src, camera, parentMatrix) {
+      if (!src._eeWarp) return render.call(this, renderer, src, camera, parentMatrix);
+      warped = src;
+      try { return render.call(this, renderer, src, camera, parentMatrix); } finally { warped = null; }
+    };
+  }
+  const TM = Phaser.GameObjects.Components.TransformMatrix.prototype;
+  const applyITRS = TM.applyITRS;
+  TM.applyITRS = function (x, y, rotation, scaleX, scaleY) {
+    if (!warped || rotation !== warped.rotation) return applyITRS.call(this, x, y, rotation, scaleX, scaleY);
+    const ay = rotation + warped._eeWarp;
+    const m = this.matrix;
+    m[0] = Math.cos(rotation) * scaleX; m[1] = Math.sin(rotation) * scaleX;
+    m[2] = -Math.sin(ay) * scaleY; m[3] = Math.cos(ay) * scaleY;
+    m[4] = x; m[5] = y;
+    return this;
+  };
+})();
 
 // Object HSV (keys 41/43 for the main colour, 42/44 for the detail colour), e.g. "0a-0.32a0.22a1a1":
 // hue shift in degrees, saturation, value, then whether s and v are added (1) or multiplied (0).
@@ -1680,20 +1721,23 @@ window.LevelObject = class LevelObject {
       offsetY = -offsetY;
     }
     let totalRotation = (sprite.getData("gjBaseRotationDeg") || 0) + objectData.rot;
-    if (totalRotation !== 0) {
-      sprite.setAngle(totalRotation);
-      let rad = totalRotation * Math.PI / 180;
-      let cosR = Math.cos(rad);
-      let sinR = Math.sin(rad);
-      let rx = offsetX * cosR - offsetY * sinR;
-      let ry = offsetX * sinR + offsetY * cosR;
-      offsetX = rx;
-      offsetY = ry;
+    const { sx, sy, kx, ky } = objectScaleWarp(objectData);
+    if (totalRotation !== 0 || kx || ky || sx !== 1 || sy !== 1) {
+      // the X axis turns by rotation + warp X, the Y axis by rotation + warp Y (equal warps = plain rotation)
+      if (totalRotation + kx !== 0) sprite.setAngle(totalRotation + kx);
+      const ax = (totalRotation + kx) * Math.PI / 180;
+      const ay = (totalRotation + ky) * Math.PI / 180;
+      const lx = offsetX * sx, ly = offsetY * sy;
+      offsetX = lx * Math.cos(ax) - ly * Math.sin(ay);
+      offsetY = lx * Math.sin(ax) + ly * Math.cos(ay);
+      if (ky !== kx) sprite._eeWarp = (ky - kx) * Math.PI / 180;
     }
     sprite.x += offsetX;
     sprite.y += offsetY;
-    if (objectData.scale !== 1) {
-      sprite.setScale(objectData.scale);
+    if (sx !== 1 || sy !== 1) {
+      sprite.setScale(sx, sy);
+      sprite._eeBaseScaleX = sx;
+      sprite._eeBaseScaleY = sy;
     }
     if (colorData) {
       const blackDefault = colorData.black === true || colorData.tint === 0;
@@ -2030,8 +2074,8 @@ window.LevelObject = class LevelObject {
       }).setOrigin(0.5);
     }
 
-    const scale = Number.isFinite(Number(levelObj.scale)) ? Number(levelObj.scale) : 1;
-    textSprite.setScale(scale * (levelObj.flipX ? -1 : 1), scale * (levelObj.flipY ? -1 : 1));
+    const { sx: textSx, sy: textSy } = objectScaleWarp(levelObj);
+    textSprite.setScale(textSx * (levelObj.flipX ? -1 : 1), textSy * (levelObj.flipY ? -1 : 1));
     textSprite.setAngle(levelObj.rot || 0);
 
     const depthBase = { "-5": -12, "-3": -9, "-1": -6, 0: 0, 1: 3, 3: 6, 5: 9, 7: 10.5, 9: 12, 11: 13.5 };
@@ -2677,9 +2721,17 @@ window.LevelObject = class LevelObject {
             localDy = -localDy;
           }
 
-          const rot = (levelObj.rot || 0) * Math.PI / 180;
-          childDx = localDx * Math.cos(rot) - localDy * Math.sin(rot);
-          childDy = localDx * Math.sin(rot) + localDy * Math.cos(rot);
+          const { sx, sy, kx, ky } = objectScaleWarp(levelObj);
+          const ax = ((levelObj.rot || 0) + kx) * Math.PI / 180;
+          const ay = ((levelObj.rot || 0) + ky) * Math.PI / 180;
+          localDx *= sx;
+          localDy *= sy;
+          childDx = localDx * Math.cos(ax) - localDy * Math.sin(ay);
+          childDy = localDx * Math.sin(ax) + localDy * Math.cos(ay);
+        } else {
+          const { sx, sy } = objectScaleWarp(levelObj);
+          childDx *= sx;
+          childDy *= sy;
         }
 
         const childWorldX = worldX + childDx;
@@ -2916,7 +2968,13 @@ window.LevelObject = class LevelObject {
   }
 
   if (objectDef) {
+    const { sx: objSx, sy: objSy } = objectScaleWarp(levelObj);
     const registerCollider = col => {
+      if (col.type !== slopeType && (objSx !== 1 || objSy !== 1)) {
+        col.w *= Math.abs(objSx);
+        col.h *= Math.abs(objSy);
+        if (col.hitbox_radius) col.hitbox_radius *= (Math.abs(objSx) + Math.abs(objSy)) / 2;
+      }
       col._baseX = col.x;
       col._baseY = col.y;
       col._baseRotationDegrees = col.rotationDegrees || 0;
@@ -4485,7 +4543,7 @@ if (!window.enableLDM) {
           visMinSection.x = visMinSection._eeWorldX;
           visMinSection.y = visMinSection._eeBaseY;
           if (!visMinSection._eeAudioScale) {
-            visMinSection.setScale(1);
+            visMinSection.setScale(visMinSection._eeBaseScaleX ?? 1, visMinSection._eeBaseScaleY ?? 1);
           }
           visMinSection.setAlpha(this._getGroupOpacityForSprite(visMinSection));
         }
@@ -4543,7 +4601,7 @@ if (!window.enableLDM) {
             effectSprite.y = effectSprite._eeBaseY;
             effectSprite.x = effectSprite._eeWorldX;
             if (!effectSprite._eeAudioScale) {
-              effectSprite.setScale(1);
+              effectSprite.setScale(effectSprite._eeBaseScaleX ?? 1, effectSprite._eeBaseScaleY ?? 1);
             }
             effectSprite.setAlpha(this._getGroupOpacityForSprite(effectSprite));
           }
@@ -4560,7 +4618,7 @@ if (!window.enableLDM) {
             effectSprite.y = effectSprite._eeBaseY;
             effectSprite.x = effectSprite._eeWorldX;
             if (!effectSprite._eeAudioScale) {
-              effectSprite.setScale(1);
+              effectSprite.setScale(effectSprite._eeBaseScaleX ?? 1, effectSprite._eeBaseScaleY ?? 1);
             }
             effectSprite.setAlpha(this._getGroupOpacityForSprite(effectSprite));
           }
@@ -4608,8 +4666,10 @@ if (!window.enableLDM) {
         if (effectSprite.alpha !== _eeFinalAlpha) {
           effectSprite.alpha = _eeFinalAlpha;
         }
-        if (!effectSprite._eeAudioScale && effectSprite.scaleX !== _0x127ace) {
-          effectSprite.setScale(_0x127ace);
+        if (!effectSprite._eeAudioScale) {
+          // scale-in/out effects scale relative to the object's own scale
+          const _eeSx = (effectSprite._eeBaseScaleX ?? 1) * _0x127ace, _eeSy = (effectSprite._eeBaseScaleY ?? 1) * _0x127ace;
+          if (effectSprite.scaleX !== _eeSx || effectSprite.scaleY !== _eeSy) effectSprite.setScale(_eeSx, _eeSy);
         }
       }
     }
